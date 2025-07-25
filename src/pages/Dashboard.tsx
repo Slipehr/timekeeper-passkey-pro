@@ -108,105 +108,112 @@ export default function Dashboard() {
     <Layout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Welcome back! Here's your timesheet overview.
-            </p>
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-lg text-muted-foreground">Track your time and boost productivity</p>
           </div>
           <Link to="/timesheet">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="btn-gradient text-lg px-6 py-3 shadow-glow hover:scale-105 transition-all duration-300">
+              <Plus className="h-5 w-5 mr-2" />
               New Entry
             </Button>
           </Link>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Hours</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="card-hover shadow-card border-0 bg-gradient-to-br from-card to-secondary/30">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Hours</CardTitle>
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalHours}</div>
-              <p className="text-xs text-muted-foreground">
-                This month
-              </p>
+              <div className="text-3xl font-bold text-foreground">{stats.totalHours}h</div>
+              <p className="text-sm text-muted-foreground">This month</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Week</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+          <Card className="card-hover shadow-card border-0 bg-gradient-to-br from-card to-emerald/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">This Week</CardTitle>
+              <div className="p-2 bg-emerald/10 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-emerald" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.thisWeekHours}</div>
-              <p className="text-xs text-muted-foreground">
-                Current week total
-              </p>
+              <div className="text-3xl font-bold text-foreground">{stats.thisWeekHours}h</div>
+              <p className="text-sm text-emerald">Current week total</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <Card className="card-hover shadow-card border-0 bg-gradient-to-br from-card to-amber/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+              <div className="p-2 bg-amber/10 rounded-lg">
+                <Calendar className="h-5 w-5 text-amber" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingEntries}</div>
-              <p className="text-xs text-muted-foreground">
-                Awaiting approval
-              </p>
+              <div className="text-3xl font-bold text-foreground">{stats.pendingEntries}</div>
+              <p className="text-sm text-muted-foreground">Awaiting approval</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Approved</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <Card className="card-hover shadow-card border-0 bg-gradient-to-br from-card to-violet/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Approved Hours</CardTitle>
+              <div className="p-2 bg-violet/10 rounded-lg">
+                <DollarSign className="h-5 w-5 text-violet" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.approvedHours}h</div>
-              <p className="text-xs text-muted-foreground">
-                Ready for billing
-              </p>
+              <div className="text-3xl font-bold text-foreground">{stats.approvedHours}h</div>
+              <p className="text-sm text-muted-foreground">Ready for billing</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Charts */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Weekly Hours</CardTitle>
-              <CardDescription>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card className="card-hover shadow-elegant border-0">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-emerald/5 rounded-t-lg">
+              <CardTitle className="text-xl text-foreground">Weekly Hours</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Your time tracking for this week
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="hours" fill="hsl(210, 100%, 50%)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
+                  <YAxis stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      boxShadow: 'var(--shadow-soft)'
+                    }}
+                  />
+                  <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Distribution</CardTitle>
-              <CardDescription>
+          <Card className="card-hover shadow-elegant border-0">
+            <CardHeader className="bg-gradient-to-r from-violet/5 to-amber/5 rounded-t-lg">
+              <CardTitle className="text-xl text-foreground">Project Distribution</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Hours breakdown by project type
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -214,14 +221,22 @@ export default function Dashboard() {
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
+                    innerRadius={30}
+                    paddingAngle={5}
                     dataKey="hours"
-                    label={({ name, value }) => `${name}: ${value}h`}
                   >
                     {projectData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      boxShadow: 'var(--shadow-soft)'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -229,38 +244,38 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Entries */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Time Entries</CardTitle>
-            <CardDescription>
+        <Card className="card-hover shadow-elegant border-0">
+          <CardHeader className="bg-gradient-to-r from-emerald/5 to-primary/5 rounded-t-lg">
+            <CardTitle className="text-xl text-foreground">Recent Time Entries</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Your latest timesheet submissions
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
+          <CardContent className="pt-6">
+            <div className="space-y-3">
               {timeEntries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-card to-secondary/20 border border-border/50 rounded-xl hover:shadow-soft transition-all duration-300"
                 >
-                  <div className="space-y-1">
-                    <p className="font-medium">{entry.project}</p>
+                  <div className="space-y-2">
+                    <p className="font-semibold text-foreground">{entry.project}</p>
                     <p className="text-sm text-muted-foreground">
                       {entry.description}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground font-medium">
                       {entry.date} • {entry.hours} hours
                     </p>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3">
                     {entry.approved && (
-                      <Badge variant="default">Approved</Badge>
+                      <Badge className="status-approved shadow-soft">Approved</Badge>
                     )}
                     {entry.submitted && !entry.approved && (
-                      <Badge variant="secondary">Pending</Badge>
+                      <Badge className="status-pending shadow-soft">Pending</Badge>
                     )}
                     {!entry.submitted && (
-                      <Badge variant="outline">Draft</Badge>
+                      <Badge className="status-draft shadow-soft">Draft</Badge>
                     )}
                   </div>
                 </div>
