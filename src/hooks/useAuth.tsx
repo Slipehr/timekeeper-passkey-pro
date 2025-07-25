@@ -45,12 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://192.168.11.3:8000/auth/login', {
+      // Try dev-login endpoint from your backend
+      const response = await fetch('http://192.168.11.3:8200/auth/dev-login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(credentials),
+        body: `email=${encodeURIComponent(credentials.email)}`,
       });
 
       if (!response.ok) {
@@ -58,15 +59,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
-      const userData: User = {
-        id: data.user_id,
-        name: data.name,
-        email: data.email,
-      };
+      
+      // Get user details using the token
+      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${data.access_token}`,
+        },
+      });
 
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        const user: User = {
+          id: userData.id,
+          name: userData.email.split('@')[0], // Extract name from email
+          email: userData.email,
+        };
+
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('token', data.access_token);
+      } else {
+        throw new Error('Failed to get user details');
+      }
     } catch (error) {
       console.log('Using mock authentication for development');
       const mockUser: User = {
@@ -90,6 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('WebAuthn is not supported in this browser');
       }
 
+      // For now, use mock until WebAuthn is fully configured
+      // TODO: Implement actual WebAuthn flow with your backend
       const mockUser: User = {
         id: 'passkey-user-456',
         name: 'Passkey User',
