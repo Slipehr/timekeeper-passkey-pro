@@ -82,15 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Failed to get user details');
       }
     } catch (error) {
-      console.log('Using mock authentication for development');
-      const mockUser: User = {
-        id: 'dev-user-123',
-        name: credentials.email.split('@')[0],
-        email: credentials.email,
-      };
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('token', 'mock-jwt-token');
+      console.error('Authentication failed:', error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -104,17 +97,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('WebAuthn is not supported in this browser');
       }
 
-      // For now, use mock until WebAuthn is fully configured
-      // TODO: Implement actual WebAuthn flow with your backend
-      const mockUser: User = {
-        id: 'passkey-user-456',
-        name: 'Passkey User',
-        email: 'passkey@example.com',
-      };
+      // Start WebAuthn authentication flow
+      const response = await fetch('http://192.168.11.3:8200/auth/passkey-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Passkey authentication failed');
+      }
+
+      const data = await response.json();
       
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      localStorage.setItem('token', 'mock-passkey-token');
+      // Get user details using the token
+      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${data.access_token}`,
+        },
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to get user details');
+      }
+
+      const userData = await userResponse.json();
+      const user: User = {
+        id: userData.id,
+        name: userData.email.split('@')[0],
+        email: userData.email,
+      };
+
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', data.access_token);
     } catch (error) {
       console.error('Passkey authentication failed:', error);
       throw error;
