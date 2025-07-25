@@ -227,7 +227,7 @@ export default function Timesheet() {
           hours: entry.hours,
           project_id: entry.project,
           description: entry.description,
-          status: 'submitted'
+          submitted: true
         }),
       });
 
