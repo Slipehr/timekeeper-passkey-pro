@@ -60,7 +60,12 @@ export default function Timesheet() {
           approved: entry.approved || false,
         }));
         
-        console.log('Mapped entries:', mappedEntries);
+        console.log('Mapped entries with submitted status:', mappedEntries.map(e => ({
+          id: e.id,
+          submitted: e.submitted,
+          approved: e.approved
+        })));
+        
         setEntries(mappedEntries);
       }
     } catch (error: any) {
