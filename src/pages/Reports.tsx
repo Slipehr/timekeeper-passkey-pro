@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout } from '@/components/Layout';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -265,7 +265,7 @@ export default function Reports() {
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
-    <Layout>
+    <div className="space-y-6">
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
@@ -594,6 +594,6 @@ export default function Reports() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </div>
   );
 }

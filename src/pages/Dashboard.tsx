@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Layout } from '@/components/Layout';
+
 import { Clock, TrendingUp, Calendar, DollarSign, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -105,7 +105,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <Layout>
+    <div className="space-y-6">
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div className="space-y-2">
@@ -284,6 +284,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </div>
   );
 }
