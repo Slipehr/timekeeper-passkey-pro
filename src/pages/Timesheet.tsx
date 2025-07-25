@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar, Plus, Edit, Trash2, Save, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface TimeEntry {
   id: string;
@@ -21,19 +22,13 @@ interface TimeEntry {
   approved: boolean;
 }
 
-const projects = [
-  'Client A - Tax Preparation',
-  'Client B - Audit',
-  'Client C - Bookkeeping',
-  'Internal - Training',
-  'Internal - Admin',
-  'Internal - Marketing',
-];
 
 export default function Timesheet() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
+  const [projects, setProjects] = useState<string[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     hours: '',
@@ -41,42 +36,58 @@ export default function Timesheet() {
     description: '',
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  });
+
+  const fetchEntries = async () => {
+    try {
+      const response = await fetch('http://192.168.11.3:8200/timesheet/entries', {
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setEntries(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch entries:', error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('http://192.168.11.3:8200/projects', {
+        headers: getAuthHeaders(),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data.map((p: any) => p.name));
+      }
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+      // Fallback to default projects
+      setProjects([
+        'Client A - Tax Preparation',
+        'Client B - Audit', 
+        'Client C - Bookkeeping',
+        'Internal - Training',
+        'Internal - Admin',
+        'Internal - Marketing',
+      ]);
+    }
+  };
 
   useEffect(() => {
-    // Mock data - in real app, this would fetch from API
-    const mockEntries: TimeEntry[] = [
-      {
-        id: '1',
-        date: '2024-01-15',
-        hours: 8,
-        project: 'Client A - Tax Preparation',
-        description: 'Annual tax filing preparation and document review',
-        submitted: true,
-        approved: true,
-      },
-      {
-        id: '2',
-        date: '2024-01-16',
-        hours: 6.5,
-        project: 'Client B - Audit',
-        description: 'Financial audit review and compliance check',
-        submitted: true,
-        approved: false,
-      },
-      {
-        id: '3',
-        date: '2024-01-17',
-        hours: 7,
-        project: 'Internal - Training',
-        description: 'Professional development and certification study',
-        submitted: false,
-        approved: false,
-      },
-    ];
-    setEntries(mockEntries);
-  }, []);
+    if (user) {
+      fetchEntries();
+      fetchProjects();
+    }
+  }, [user]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.date || !formData.hours || !formData.project || !formData.description) {
@@ -98,36 +109,61 @@ export default function Timesheet() {
       return;
     }
 
-    if (editingEntry) {
-      // Update existing entry
-      setEntries(prev => prev.map(entry => 
-        entry.id === editingEntry.id 
-          ? { ...entry, ...formData, hours }
-          : entry
-      ));
-      toast({
-        title: "Entry updated",
-        description: "Your time entry has been updated successfully.",
-      });
-    } else {
-      // Create new entry
-      const newEntry: TimeEntry = {
-        id: Date.now().toString(),
+    setIsLoading(true);
+    try {
+      const entryData = {
         date: formData.date,
         hours,
         project: formData.project,
         description: formData.description,
-        submitted: false,
-        approved: false,
       };
-      setEntries(prev => [newEntry, ...prev]);
-      toast({
-        title: "Entry created",
-        description: "Your time entry has been saved as a draft.",
-      });
-    }
 
-    resetForm();
+      if (editingEntry) {
+        // Update existing entry
+        const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${editingEntry.id}`, {
+          method: 'PUT',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(entryData),
+        });
+
+        if (response.ok) {
+          await fetchEntries();
+          toast({
+            title: "Entry updated",
+            description: "Your time entry has been updated successfully.",
+          });
+        } else {
+          throw new Error('Failed to update entry');
+        }
+      } else {
+        // Create new entry
+        const response = await fetch('http://192.168.11.3:8200/timesheet/entries', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify(entryData),
+        });
+
+        if (response.ok) {
+          await fetchEntries();
+          toast({
+            title: "Entry created",
+            description: "Your time entry has been saved as a draft.",
+          });
+        } else {
+          throw new Error('Failed to create entry');
+        }
+      }
+
+      resetForm();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save time entry. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const resetForm = () => {
@@ -152,22 +188,54 @@ export default function Timesheet() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setEntries(prev => prev.filter(entry => entry.id !== id));
-    toast({
-      title: "Entry deleted",
-      description: "The time entry has been removed.",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        await fetchEntries();
+        toast({
+          title: "Entry deleted",
+          description: "The time entry has been removed.",
+        });
+      } else {
+        throw new Error('Failed to delete entry');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete entry. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSubmitEntry = (id: string) => {
-    setEntries(prev => prev.map(entry =>
-      entry.id === id ? { ...entry, submitted: true } : entry
-    ));
-    toast({
-      title: "Entry submitted",
-      description: "Your time entry has been submitted for approval.",
-    });
+  const handleSubmitEntry = async (id: string) => {
+    try {
+      const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${id}/submit`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
+
+      if (response.ok) {
+        await fetchEntries();
+        toast({
+          title: "Entry submitted",
+          description: "Your time entry has been submitted for approval.",
+        });
+      } else {
+        throw new Error('Failed to submit entry');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit entry. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0);
@@ -258,9 +326,9 @@ export default function Timesheet() {
                   <Button type="button" variant="outline" onClick={resetForm}>
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" disabled={isLoading}>
                     <Save className="h-4 w-4 mr-2" />
-                    {editingEntry ? 'Update' : 'Save'}
+                    {isLoading ? 'Saving...' : editingEntry ? 'Update' : 'Save'}
                   </Button>
                 </div>
               </form>

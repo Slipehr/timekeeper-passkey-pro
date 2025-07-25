@@ -20,6 +20,7 @@ import {
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   BarChart,
   Bar,
@@ -51,34 +52,18 @@ interface ReportFilters {
   status: string;
 }
 
-const projects = [
-  'All Projects',
-  'Client A - Tax Preparation',
-  'Client B - Audit',
-  'Client C - Bookkeeping',
-  'Internal - Training',
-  'Internal - Admin',
-  'Internal - Marketing',
-];
-
-const users = [
-  'All Users',
-  'John Doe',
-  'Jane Smith',
-  'Michael Johnson',
-  'Sarah Williams',
-];
-
 const statusOptions = [
   'All Statuses',
   'Draft',
-  'Submitted',
+  'Submitted', 
   'Approved',
 ];
 
 export default function Reports() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<TimeEntry[]>([]);
+  const [projects, setProjects] = useState<string[]>(['All Projects']);
+  const [users, setUsers] = useState<string[]>(['All Users']);
   const [filters, setFilters] = useState<ReportFilters>({
     startDate: startOfMonth(new Date()),
     endDate: endOfMonth(new Date()),
@@ -87,64 +72,71 @@ export default function Reports() {
     status: 'All Statuses',
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  });
+
+  const fetchReportsData = async () => {
+    try {
+      const [entriesResponse, projectsResponse, usersResponse] = await Promise.all([
+        fetch('http://192.168.11.3:8200/timesheet/entries', {
+          headers: getAuthHeaders(),
+        }),
+        fetch('http://192.168.11.3:8200/projects', {
+          headers: getAuthHeaders(),
+        }),
+        fetch('http://192.168.11.3:8200/users', {
+          headers: getAuthHeaders(),
+        }),
+      ]);
+
+      if (entriesResponse.ok) {
+        const entriesData = await entriesResponse.json();
+        setEntries(entriesData);
+        setFilteredEntries(entriesData);
+      }
+
+      if (projectsResponse.ok) {
+        const projectsData = await projectsResponse.json();
+        setProjects(['All Projects', ...projectsData.map((p: any) => p.name)]);
+      }
+
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        setUsers(['All Users', ...usersData.map((u: any) => u.name)]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch reports data:', error);
+      // Use fallback data
+      setEntries([]);
+      setFilteredEntries([]);
+      setProjects([
+        'All Projects',
+        'Client A - Tax Preparation',
+        'Client B - Audit',
+        'Client C - Bookkeeping',
+        'Internal - Training',
+        'Internal - Admin',
+        'Internal - Marketing',
+      ]);
+      setUsers([
+        'All Users',
+        'John Doe',
+        'Jane Smith',
+        'Michael Johnson',
+        'Sarah Williams',
+      ]);
+    }
+  };
 
   useEffect(() => {
-    // Mock data - in real app, this would fetch from API
-    const mockEntries: TimeEntry[] = [
-      {
-        id: '1',
-        date: '2024-01-15',
-        hours: 8,
-        project: 'Client A - Tax Preparation',
-        description: 'Annual tax filing preparation',
-        submitted: true,
-        approved: true,
-        user: 'John Doe',
-      },
-      {
-        id: '2',
-        date: '2024-01-16',
-        hours: 6.5,
-        project: 'Client B - Audit',
-        description: 'Financial audit review',
-        submitted: true,
-        approved: false,
-        user: 'Jane Smith',
-      },
-      {
-        id: '3',
-        date: '2024-01-17',
-        hours: 7,
-        project: 'Internal - Training',
-        description: 'Professional development',
-        submitted: false,
-        approved: false,
-        user: 'John Doe',
-      },
-      {
-        id: '4',
-        date: '2024-01-18',
-        hours: 8.5,
-        project: 'Client C - Bookkeeping',
-        description: 'Monthly bookkeeping tasks',
-        submitted: true,
-        approved: true,
-        user: 'Michael Johnson',
-      },
-      {
-        id: '5',
-        date: '2024-01-19',
-        hours: 5,
-        project: 'Internal - Admin',
-        description: 'Administrative tasks',
-        submitted: true,
-        approved: true,
-        user: 'Sarah Williams',
-      },
-    ];
-    setEntries(mockEntries);
-    setFilteredEntries(mockEntries);
-  }, []);
+    if (user) {
+      fetchReportsData();
+    }
+  }, [user]);
 
   useEffect(() => {
     // Apply filters

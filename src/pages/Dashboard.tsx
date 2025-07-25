@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { Clock, TrendingUp, Calendar, DollarSign, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import {
   BarChart,
   Bar,
@@ -38,71 +39,72 @@ export default function Dashboard() {
     pendingEntries: 0,
     approvedHours: 0,
   });
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
+  const [projectData, setProjectData] = useState<any[]>([]);
+  const { user } = useAuth();
+
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+  });
+
+  const fetchDashboardData = async () => {
+    try {
+      const [entriesResponse, statsResponse, chartsResponse] = await Promise.all([
+        fetch('http://192.168.11.3:8200/timesheet/entries', {
+          headers: getAuthHeaders(),
+        }),
+        fetch('http://192.168.11.3:8200/dashboard/stats', {
+          headers: getAuthHeaders(),
+        }),
+        fetch('http://192.168.11.3:8200/dashboard/charts', {
+          headers: getAuthHeaders(),
+        }),
+      ]);
+
+      if (entriesResponse.ok) {
+        const entries = await entriesResponse.json();
+        setTimeEntries(entries.slice(0, 5)); // Show only recent 5 entries
+      }
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData);
+      }
+
+      if (chartsResponse.ok) {
+        const chartsData = await chartsResponse.json();
+        setWeeklyData(chartsData.weeklyData || []);
+        setProjectData(chartsData.projectData || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      // Use fallback mock data
+      setTimeEntries([]);
+      setStats({
+        totalHours: 0,
+        thisWeekHours: 0,
+        pendingEntries: 0,
+        approvedHours: 0,
+      });
+      setWeeklyData([
+        { day: 'Mon', hours: 0 },
+        { day: 'Tue', hours: 0 },
+        { day: 'Wed', hours: 0 },
+        { day: 'Thu', hours: 0 },
+        { day: 'Fri', hours: 0 },
+        { day: 'Sat', hours: 0 },
+        { day: 'Sun', hours: 0 },
+      ]);
+      setProjectData([]);
+    }
+  };
 
   useEffect(() => {
-    // Mock data - in real app, this would fetch from API
-    const mockEntries: TimeEntry[] = [
-      {
-        id: '1',
-        date: '2024-01-15',
-        hours: 8,
-        project: 'Client A - Tax Preparation',
-        description: 'Annual tax filing preparation',
-        submitted: true,
-        approved: true,
-      },
-      {
-        id: '2',
-        date: '2024-01-16',
-        hours: 6.5,
-        project: 'Client B - Audit',
-        description: 'Financial audit review',
-        submitted: true,
-        approved: false,
-      },
-      {
-        id: '3',
-        date: '2024-01-17',
-        hours: 7,
-        project: 'Internal - Training',
-        description: 'Professional development',
-        submitted: false,
-        approved: false,
-      },
-    ];
-
-    setTimeEntries(mockEntries);
-    
-    const totalHours = mockEntries.reduce((sum, entry) => sum + entry.hours, 0);
-    const approvedHours = mockEntries
-      .filter(entry => entry.approved)
-      .reduce((sum, entry) => sum + entry.hours, 0);
-    const pendingEntries = mockEntries.filter(entry => entry.submitted && !entry.approved).length;
-
-    setStats({
-      totalHours,
-      thisWeekHours: totalHours, // Simplified for demo
-      pendingEntries,
-      approvedHours,
-    });
-  }, []);
-
-  const weeklyData = [
-    { day: 'Mon', hours: 8 },
-    { day: 'Tue', hours: 6.5 },
-    { day: 'Wed', hours: 7 },
-    { day: 'Thu', hours: 8 },
-    { day: 'Fri', hours: 6 },
-    { day: 'Sat', hours: 0 },
-    { day: 'Sun', hours: 0 },
-  ];
-
-  const projectData = [
-    { name: 'Tax Preparation', hours: 24, fill: 'hsl(210, 100%, 50%)' },
-    { name: 'Audit', hours: 18, fill: 'hsl(220, 100%, 60%)' },
-    { name: 'Training', hours: 8, fill: 'hsl(200, 100%, 40%)' },
-    { name: 'Admin', hours: 6, fill: 'hsl(230, 100%, 70%)' },
-  ];
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   return (
     <div className="space-y-6">
