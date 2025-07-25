@@ -42,7 +42,7 @@ export default function Timesheet() {
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch('http://192.168.11.3:8200/timesheet/entries', {
+      const response = await fetch('http://192.168.11.3:8200/timesheets/entries', {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -118,7 +118,7 @@ export default function Timesheet() {
 
       if (editingEntry) {
         // Update existing entry
-        const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${editingEntry.id}`, {
+        const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${editingEntry.id}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -135,7 +135,7 @@ export default function Timesheet() {
         }
       } else {
         // Create new entry
-        const response = await fetch('http://192.168.11.3:8200/timesheet/entries', {
+        const response = await fetch('http://192.168.11.3:8200/timesheets/entries', {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -188,7 +188,7 @@ export default function Timesheet() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${id}`, {
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -213,7 +213,7 @@ export default function Timesheet() {
 
   const handleSubmitEntry = async (id: string) => {
     try {
-      const response = await fetch(`http://192.168.11.3:8200/timesheet/entries/${id}/submit`, {
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${id}/submit`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });

@@ -48,7 +48,7 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const [entriesResponse, statsResponse, chartsResponse] = await Promise.all([
-        fetch('http://192.168.11.3:8200/timesheet/entries', {
+        fetch('http://192.168.11.3:8200/timesheets/entries', {
           headers: getAuthHeaders(),
         }),
         fetch('http://192.168.11.3:8200/dashboard/stats', {
