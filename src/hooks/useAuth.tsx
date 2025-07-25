@@ -49,9 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch('http://192.168.11.3:8200/auth/dev-login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: `email=${encodeURIComponent(credentials.email)}`,
+        body: JSON.stringify({ email: credentials.email }),
       });
 
       if (!response.ok) {
