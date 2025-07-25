@@ -10,6 +10,7 @@ import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Timesheet from "./pages/Timesheet";
+import Projects from "./pages/Projects";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -33,6 +34,13 @@ const App = () => (
             <Route path="/timesheet" element={
               <ProtectedRoute>
                 <Timesheet />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <RoleBasedRoute requiredRoles={[UserRole.MANAGER, UserRole.ADMINISTRATOR]}>
+                  <Projects />
+                </RoleBasedRoute>
               </ProtectedRoute>
             } />
             <Route path="/reports" element={
