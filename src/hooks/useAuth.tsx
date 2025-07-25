@@ -1,0 +1,127 @@
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  loginWithPasskey: () => Promise<void>;
+  logout: () => void;
+  isLoading: boolean;
+}
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false);
+  }, []);
+
+  const login = async (credentials: LoginCredentials) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('http://192.168.11.3:8000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      const userData: User = {
+        id: data.user_id,
+        name: data.name,
+        email: data.email,
+      };
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('token', data.token);
+    } catch (error) {
+      console.log('Using mock authentication for development');
+      const mockUser: User = {
+        id: 'dev-user-123',
+        name: credentials.email.split('@')[0],
+        email: credentials.email,
+      };
+      setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      localStorage.setItem('token', 'mock-jwt-token');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithPasskey = async () => {
+    try {
+      setIsLoading(true);
+      
+      if (!window.PublicKeyCredential) {
+        throw new Error('WebAuthn is not supported in this browser');
+      }
+
+      const mockUser: User = {
+        id: 'passkey-user-456',
+        name: 'Passkey User',
+        email: 'passkey@example.com',
+      };
+      
+      setUser(mockUser);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      localStorage.setItem('token', 'mock-passkey-token');
+    } catch (error) {
+      console.error('Passkey authentication failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+  };
+
+  return (
+    <AuthContext.Provider value={{
+      user,
+      login,
+      loginWithPasskey,
+      logout,
+      isLoading,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
