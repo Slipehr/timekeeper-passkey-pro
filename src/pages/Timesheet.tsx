@@ -49,15 +49,15 @@ export default function Timesheet() {
         const data = await response.json();
         console.log('Raw API response:', data);
         
-        // Map the API response to match our interface
+        // Map the API response to match our interface with new status field
         const mappedEntries = data.map((entry: any) => ({
           id: entry.id,
           date: entry.date,
           hours: entry.hours,
-          project: entry.project_id || entry.project, // Handle both possible field names
+          project: entry.project_id || entry.project,
           description: entry.description,
-          submitted: entry.submitted || false,
-          approved: entry.approved || false,
+          submitted: entry.status === "submitted" || entry.status === "approved",
+          approved: entry.status === "approved",
         }));
         
         console.log('Mapped entries with submitted status:', mappedEntries.map(e => ({
@@ -243,9 +243,9 @@ export default function Timesheet() {
       const payload = {
         date: entry.date,
         hours: entry.hours,
-        project_id: entry.project, // entry.project is already the project ID
+        project_id: entry.project,
         description: entry.description,
-        submitted: true
+        status: "submitted"
       };
 
       console.log('Submitting with payload:', payload);
