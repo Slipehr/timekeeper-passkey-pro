@@ -46,7 +46,20 @@ export default function Projects() {
 
       if (response.ok) {
         const projectsData = await response.json();
-        setProjects(projectsData);
+        console.log('Projects raw API response:', projectsData);
+        
+        // Map the API response to ensure consistent status field handling
+        const mappedProjects = projectsData.map((project: any) => ({
+          id: project.id,
+          name: project.name,
+          description: project.description,
+          status: project.status || 'active', // Default to active if status is missing
+          created_at: project.created_at,
+          updated_at: project.updated_at,
+        }));
+        
+        console.log('Mapped projects:', mappedProjects);
+        setProjects(mappedProjects);
       } else {
         handleApiError(response, 'Failed to fetch projects');
       }
