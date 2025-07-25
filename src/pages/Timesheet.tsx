@@ -42,12 +42,26 @@ export default function Timesheet() {
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch('http://192.168.11.3:8200/timesheets', {
+      const response = await fetch('http://192.168.11.3:8200/timesheets/', {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
-        setEntries(data);
+        console.log('Raw API response:', data);
+        
+        // Map the API response to match our interface
+        const mappedEntries = data.map((entry: any) => ({
+          id: entry.id,
+          date: entry.date,
+          hours: entry.hours,
+          project: entry.project_id || entry.project, // Handle both possible field names
+          description: entry.description,
+          submitted: entry.submitted || false,
+          approved: entry.approved || false,
+        }));
+        
+        console.log('Mapped entries:', mappedEntries);
+        setEntries(mappedEntries);
       }
     } catch (error: any) {
       console.error('Failed to fetch entries:', error);
