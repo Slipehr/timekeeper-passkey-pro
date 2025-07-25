@@ -19,10 +19,6 @@ export function Layout({ children }: LayoutProps) {
     navigate('/login');
   };
 
-  if (!user) {
-    return <>{children}</>;
-  }
-
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-gradient-subtle">
