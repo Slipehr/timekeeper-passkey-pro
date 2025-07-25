@@ -233,7 +233,8 @@ export default function Timesheet() {
         throw new Error('Entry not found');
       }
 
-      // Remove debug logs - entry.project is the project ID
+      console.log('Before submission - Entry state:', entry);
+      
       const payload = {
         date: entry.date,
         hours: entry.hours,
@@ -242,6 +243,7 @@ export default function Timesheet() {
         submitted: true
       };
 
+      console.log('Submitting with payload:', payload);
 
       const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'PUT',
@@ -249,16 +251,26 @@ export default function Timesheet() {
         body: JSON.stringify(payload),
       });
 
+      console.log('Submit response status:', response.status);
+      
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('Submit response data:', responseData);
+        
+        console.log('Calling fetchEntries() to refresh...');
         await fetchEntries();
+        
         toast({
           title: "Entry submitted",
           description: "Your time entry has been submitted for approval.",
         });
       } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Submit failed:', response.status, errorData);
         throw new Error('Failed to submit entry');
       }
     } catch (error: any) {
+      console.error('Submit error:', error);
       handleApiError(error, 'Failed to submit entry');
     }
   };
