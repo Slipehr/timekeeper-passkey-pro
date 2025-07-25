@@ -261,6 +261,7 @@ export default function Timesheet() {
       if (response.ok) {
         const responseData = await response.json();
         console.log('Submit response data:', responseData);
+        console.log('Response shows submitted as:', responseData.submitted);
         
         console.log('Calling fetchEntries() to refresh...');
         await fetchEntries();
