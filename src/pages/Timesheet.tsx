@@ -26,14 +26,14 @@ interface TimeEntry {
 
 export default function Timesheet() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
-  const [projects, setProjects] = useState<string[]>([]);
+  const [projects, setProjects] = useState<Array<{id: string, name: string}>>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     hours: '',
-    project: '',
+    project_id: '',
     description: '',
   });
   const { toast } = useToast();
@@ -62,18 +62,18 @@ export default function Timesheet() {
       });
       if (response.ok) {
         const data = await response.json();
-        setProjects(data.map((p: any) => p.name));
+        setProjects(data);
       }
     } catch (error) {
       console.error('Failed to fetch projects:', error);
       // Fallback to default projects
       setProjects([
-        'Client A - Tax Preparation',
-        'Client B - Audit', 
-        'Client C - Bookkeeping',
-        'Internal - Training',
-        'Internal - Admin',
-        'Internal - Marketing',
+        { id: '1', name: 'Client A - Tax Preparation' },
+        { id: '2', name: 'Client B - Audit' },
+        { id: '3', name: 'Client C - Bookkeeping' },
+        { id: '4', name: 'Internal - Training' },
+        { id: '5', name: 'Internal - Admin' },
+        { id: '6', name: 'Internal - Marketing' },
       ]);
     }
   };
@@ -88,7 +88,7 @@ export default function Timesheet() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.date || !formData.hours || !formData.project || !formData.description) {
+    if (!formData.date || !formData.hours || !formData.project_id || !formData.description) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields.",
@@ -112,7 +112,7 @@ export default function Timesheet() {
       const entryData = {
         date: formData.date,
         hours,
-        project: formData.project,
+        project_id: formData.project_id,
         description: formData.description,
       };
 
@@ -168,7 +168,7 @@ export default function Timesheet() {
     setFormData({
       date: new Date().toISOString().split('T')[0],
       hours: '',
-      project: '',
+      project_id: '',
       description: '',
     });
     setEditingEntry(null);
@@ -180,7 +180,7 @@ export default function Timesheet() {
     setFormData({
       date: entry.date,
       hours: entry.hours.toString(),
-      project: entry.project,
+      project_id: entry.project, // This will need to be mapped to project_id
       description: entry.description,
     });
     setIsDialogOpen(true);
@@ -295,16 +295,16 @@ export default function Timesheet() {
                 <div className="space-y-2">
                   <Label htmlFor="project">Project</Label>
                   <Select 
-                    value={formData.project} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, project: value }))}
+                    value={formData.project_id} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, project_id: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
                     <SelectContent>
                       {projects.map((project) => (
-                        <SelectItem key={project} value={project}>
-                          {project}
+                        <SelectItem key={project.id} value={project.id}>
+                          {project.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
