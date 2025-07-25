@@ -213,10 +213,22 @@ export default function Timesheet() {
 
   const handleSubmitEntry = async (id: string) => {
     try {
+      // Find the entry to get its complete data
+      const entry = entries.find(e => e.id === id);
+      if (!entry) {
+        throw new Error('Entry not found');
+      }
+
       const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ status: 'submitted' }),
+        body: JSON.stringify({
+          date: entry.date,
+          hours: entry.hours,
+          project_id: entry.project,
+          description: entry.description,
+          status: 'submitted'
+        }),
       });
 
       if (response.ok) {
