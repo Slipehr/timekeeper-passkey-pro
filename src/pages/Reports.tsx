@@ -96,15 +96,15 @@ export default function Reports() {
         const entriesData = await entriesResponse.json();
         console.log('Reports raw entries:', entriesData);
         
-        // Map the API response to match our interface
+        // Map the API response to match our interface with new status field
         const mappedEntries = entriesData.map((entry: any) => ({
           id: entry.id,
           date: entry.date,
           hours: entry.hours,
           project: entry.project_id || entry.project,
           description: entry.description,
-          submitted: entry.submitted || false,
-          approved: entry.approved || false,
+          submitted: entry.status === "submitted" || entry.status === "approved",
+          approved: entry.status === "approved",
           user: entry.user || 'Unknown User',
         }));
         
