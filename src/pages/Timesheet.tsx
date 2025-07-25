@@ -219,13 +219,14 @@ export default function Timesheet() {
         throw new Error('Entry not found');
       }
 
-      // Find the project ID - entry.project might be the project name, not ID
-      const projectId = projects.find(p => p.name === entry.project)?.id || entry.project;
+      // entry.project is the project ID, not the name
+      console.log('Entry project field:', entry.project);
+      console.log('Available projects:', projects);
       
       const payload = {
         date: entry.date,
         hours: entry.hours,
-        project_id: projectId,
+        project_id: entry.project, // entry.project is already the project ID
         description: entry.description,
         submitted: true
       };
