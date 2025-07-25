@@ -61,7 +61,20 @@ export default function Dashboard() {
 
       if (entriesResponse.ok) {
         const entries = await entriesResponse.json();
-        setTimeEntries(entries.slice(0, 5)); // Show only recent 5 entries
+        console.log('Dashboard raw entries:', entries);
+        
+        // Map the API response to match our interface
+        const mappedEntries = entries.map((entry: any) => ({
+          id: entry.id,
+          date: entry.date,
+          hours: entry.hours,
+          project: entry.project_id || entry.project,
+          description: entry.description,
+          submitted: entry.submitted || false,
+          approved: entry.approved || false,
+        }));
+        
+        setTimeEntries(mappedEntries.slice(0, 5)); // Show only recent 5 entries
       }
 
       if (statsResponse.ok) {

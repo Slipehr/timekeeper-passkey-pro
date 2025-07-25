@@ -194,7 +194,7 @@ export default function Timesheet() {
     setFormData({
       date: entry.date,
       hours: entry.hours.toString(),
-      project_id: entry.project, // This will need to be mapped to project_id
+      project_id: entry.project, // entry.project is the project ID from API
       description: entry.description,
     });
     setIsDialogOpen(true);
@@ -233,10 +233,7 @@ export default function Timesheet() {
         throw new Error('Entry not found');
       }
 
-      // entry.project is the project ID, not the name
-      console.log('Entry project field:', entry.project);
-      console.log('Available projects:', projects);
-      
+      // Remove debug logs - entry.project is the project ID
       const payload = {
         date: entry.date,
         hours: entry.hours,
@@ -245,7 +242,6 @@ export default function Timesheet() {
         submitted: true
       };
 
-      console.log('Submitting timesheet entry with payload:', payload);
 
       const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'PUT',
@@ -271,6 +267,12 @@ export default function Timesheet() {
   const submittedHours = entries
     .filter(entry => entry.submitted)
     .reduce((sum, entry) => sum + entry.hours, 0);
+
+  // Helper function to get project name from ID
+  const getProjectName = (projectId: string): string => {
+    const project = projects.find(p => p.id === projectId);
+    return project ? project.name : projectId;
+  };
 
   return (
     <div className="space-y-6">
@@ -435,7 +437,7 @@ export default function Timesheet() {
                   >
                     <div className="space-y-1 flex-1">
                       <div className="flex items-center space-x-3">
-                        <p className="font-medium">{entry.project}</p>
+                        <p className="font-medium">{getProjectName(entry.project)}</p>
                         <div className="flex items-center space-x-2">
                           {entry.approved && (
                             <Badge variant="default">Approved</Badge>
