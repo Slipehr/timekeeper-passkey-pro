@@ -219,16 +219,23 @@ export default function Timesheet() {
         throw new Error('Entry not found');
       }
 
+      // Find the project ID - entry.project might be the project name, not ID
+      const projectId = projects.find(p => p.name === entry.project)?.id || entry.project;
+      
+      const payload = {
+        date: entry.date,
+        hours: entry.hours,
+        project_id: projectId,
+        description: entry.description,
+        submitted: true
+      };
+
+      console.log('Submitting timesheet entry with payload:', payload);
+
       const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          date: entry.date,
-          hours: entry.hours,
-          project_id: entry.project,
-          description: entry.description,
-          submitted: true
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
