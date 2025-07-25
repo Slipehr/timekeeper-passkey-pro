@@ -42,7 +42,7 @@ export default function Timesheet() {
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch('http://192.168.11.3:8200/timesheets/entries', {
+      const response = await fetch('http://192.168.11.3:8200/timesheets', {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -118,7 +118,7 @@ export default function Timesheet() {
 
       if (editingEntry) {
         // Update existing entry
-        const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${editingEntry.id}`, {
+        const response = await fetch(`http://192.168.11.3:8200/timesheets/${editingEntry.id}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -135,7 +135,7 @@ export default function Timesheet() {
         }
       } else {
         // Create new entry
-        const response = await fetch('http://192.168.11.3:8200/timesheets/entries', {
+        const response = await fetch('http://192.168.11.3:8200/timesheets', {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -188,7 +188,7 @@ export default function Timesheet() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${id}`, {
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -213,9 +213,10 @@ export default function Timesheet() {
 
   const handleSubmitEntry = async (id: string) => {
     try {
-      const response = await fetch(`http://192.168.11.3:8200/timesheets/entries/${id}/submit`, {
-        method: 'POST',
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
+        method: 'PUT',
         headers: getAuthHeaders(),
+        body: JSON.stringify({ status: 'submitted' }),
       });
 
       if (response.ok) {
@@ -227,12 +228,8 @@ export default function Timesheet() {
       } else {
         throw new Error('Failed to submit entry');
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit entry. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      handleApiError(error, 'Failed to submit entry');
     }
   };
 
