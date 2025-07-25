@@ -1,4 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
+import { usePermissions } from '@/hooks/usePermissions';
+import { UserRole } from '@/hooks/useAuth';
 import { 
   BarChart3, 
   Clock, 
@@ -20,15 +22,16 @@ import {
 import { cn } from '@/lib/utils';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: BarChart3, color: 'text-primary' },
-  { name: 'Timesheet', href: '/timesheet', icon: Clock, color: 'text-emerald' },
-  { name: 'Reports', href: '/reports', icon: FileText, color: 'text-violet' },
+  { name: 'Dashboard', href: '/dashboard', icon: BarChart3, color: 'text-primary', roles: [UserRole.USER, UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR] },
+  { name: 'Timesheet', href: '/timesheet', icon: Clock, color: 'text-emerald', roles: [UserRole.USER, UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR] },
+  { name: 'Reports', href: '/reports', icon: FileText, color: 'text-violet', roles: [UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR] },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const { hasAnyRole } = usePermissions();
 
   return (
     <Sidebar 
@@ -58,7 +61,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {navigation.map((item) => {
+              {navigation
+                .filter(item => hasAnyRole(item.roles))
+                .map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.href;
                 

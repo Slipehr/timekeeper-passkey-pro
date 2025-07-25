@@ -21,6 +21,8 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-f
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useApi } from '@/hooks/useApi';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   BarChart,
   Bar,
@@ -73,11 +75,8 @@ export default function Reports() {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  });
+  const { getAuthHeaders, handleApiError } = useApi();
+  const { canViewAllReports } = usePermissions();
 
   const fetchReportsData = async () => {
     try {
@@ -108,8 +107,9 @@ export default function Reports() {
         const usersData = await usersResponse.json();
         setUsers(['All Users', ...usersData.map((u: any) => u.name)]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch reports data:', error);
+      handleApiError(error, 'Failed to load reports data');
       // Use fallback data
       setEntries([]);
       setFilteredEntries([]);
@@ -388,24 +388,26 @@ export default function Reports() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label>User</Label>
-                <Select
-                  value={filters.user}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, user: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user} value={user}>
-                        {user}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {canViewAllReports && (
+                <div className="space-y-2">
+                  <Label>User</Label>
+                  <Select
+                    value={filters.user}
+                    onValueChange={(value) => setFilters(prev => ({ ...prev, user: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {users.map((user) => (
+                        <SelectItem key={user} value={user}>
+                          {user}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Status</Label>

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar, Plus, Edit, Trash2, Save, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useApi } from '@/hooks/useApi';
 
 interface TimeEntry {
   id: string;
@@ -37,11 +38,7 @@ export default function Timesheet() {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  });
+  const { getAuthHeaders, handleApiError } = useApi();
 
   const fetchEntries = async () => {
     try {
@@ -52,8 +49,9 @@ export default function Timesheet() {
         const data = await response.json();
         setEntries(data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch entries:', error);
+      handleApiError(error, 'Failed to load timesheet entries');
     }
   };
 

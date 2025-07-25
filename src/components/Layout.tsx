@@ -5,6 +5,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { LogOut, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { user: userWithRole } = usePermissions();
   
   const handleLogout = () => {
     logout();

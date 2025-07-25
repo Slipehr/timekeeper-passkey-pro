@@ -1,10 +1,19 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
+export enum UserRole {
+  USER = "user",
+  AUDIT = "audit", 
+  MANAGER = "manager",
+  ADMINISTRATOR = "administrator"
+}
+
 export interface User {
   id: string;
   name: string;
   email: string;
+  role: UserRole;
+  created_at: string;
 }
 
 interface AuthContextType {
@@ -68,11 +77,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (userResponse.ok) {
-        const userData = await userResponse.json();
+      const userData = await userResponse.json();
         const user: User = {
           id: userData.id,
           name: userData.email.split('@')[0], // Extract name from email
           email: userData.email,
+          role: userData.role as UserRole,
+          created_at: userData.created_at,
         };
 
         setUser(user);
@@ -127,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: userData.id,
         name: userData.email.split('@')[0],
         email: userData.email,
+        role: userData.role as UserRole,
+        created_at: userData.created_at,
       };
 
       setUser(user);

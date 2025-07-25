@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, TrendingUp, Calendar, DollarSign, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useApi } from '@/hooks/useApi';
 import {
   BarChart,
   Bar,
@@ -42,11 +43,7 @@ export default function Dashboard() {
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [projectData, setProjectData] = useState<any[]>([]);
   const { user } = useAuth();
-
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  });
+  const { getAuthHeaders, handleApiError } = useApi();
 
   const fetchDashboardData = async () => {
     try {
@@ -77,8 +74,9 @@ export default function Dashboard() {
         setWeeklyData(chartsData.weeklyData || []);
         setProjectData(chartsData.projectData || []);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch dashboard data:', error);
+      handleApiError(error, 'Failed to load dashboard data');
       // Use fallback mock data
       setTimeEntries([]);
       setStats({

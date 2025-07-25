@@ -4,8 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, UserRole } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Timesheet from "./pages/Timesheet";
@@ -36,7 +37,9 @@ const App = () => (
             } />
             <Route path="/reports" element={
               <ProtectedRoute>
-                <Reports />
+                <RoleBasedRoute requiredRoles={[UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR]}>
+                  <Reports />
+                </RoleBasedRoute>
               </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
