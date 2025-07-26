@@ -214,7 +214,9 @@ export function ManagerDashboard() {
                     <TableCell className="font-medium">
                       {entry.user.first_name} {entry.user.last_name}
                     </TableCell>
-                    <TableCell>{entry.project.name}</TableCell>
+                     <TableCell>
+                       {typeof entry.project === 'string' ? entry.project : entry.project?.name || 'Unknown Project'}
+                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-2" />
