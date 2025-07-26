@@ -25,9 +25,10 @@ export function usePermissions() {
   };
 
   const canCreateUsers = () => hasRole(UserRole.ADMINISTRATOR);
-  const canViewAllReports = () => hasRole(UserRole.MANAGER);
+  const canViewAllReports = () => hasAnyRole([UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR]);
   const canAuditTimeEntries = () => hasRole(UserRole.AUDIT);
   const canManageProjects = () => hasRole(UserRole.MANAGER);
+  const canApproveTimeEntries = () => hasAnyRole([UserRole.AUDIT, UserRole.MANAGER]);
 
   return {
     user,
@@ -38,5 +39,6 @@ export function usePermissions() {
     canViewAllReports,
     canAuditTimeEntries,
     canManageProjects,
+    canApproveTimeEntries,
   };
 }

@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Clock, TrendingUp, CheckCircle, AlertCircle, Calendar } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface DashboardStats {
   totalHours: number;
@@ -27,6 +28,7 @@ interface TimeEntry {
 }
 
 export function ManagerDashboard() {
+  const { canApproveTimeEntries } = usePermissions();
   const [stats, setStats] = useState<DashboardStats>({
     totalHours: 0,
     projectsActive: 0,
@@ -250,7 +252,7 @@ export function ManagerDashboard() {
                     </TableCell>
                     <TableCell>{getStatusBadge(entry.status)}</TableCell>
                     <TableCell>
-                      {entry.status === 'submitted' && (
+                      {entry.status === 'submitted' && canApproveTimeEntries() && (
                         <Button
                           size="sm"
                           onClick={() => approveEntry(entry.id)}

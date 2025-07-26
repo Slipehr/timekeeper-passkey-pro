@@ -2,22 +2,20 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { UserRole } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Layout } from '@/components/Layout';
-import Timesheet from '@/pages/Timesheet';
+import Approvals from '@/pages/Approvals';
 
-export function ProtectedTimesheet() {
-  console.log('ProtectedTimesheet: Starting render');
+export function ProtectedApprovals() {
   const { user, hasAnyRole } = usePermissions();
-  console.log('ProtectedTimesheet: User and permissions loaded', { user, hasAnyRole });
 
-  // Only allow users and managers to access timesheet (audit users view-only through reports)
-  if (!hasAnyRole([UserRole.USER, UserRole.MANAGER])) {
+  // Only allow audit and manager roles to access approvals
+  if (!hasAnyRole([UserRole.AUDIT, UserRole.MANAGER])) {
     return (
       <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-destructive">Access Denied</CardTitle>
             <CardDescription>
-              Only users and managers can access timesheet for time entry. Audit users can view time data through Reports.
+              You don't have permission to access approvals. Only audit users and managers can access this section.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -25,6 +23,5 @@ export function ProtectedTimesheet() {
     );
   }
 
-  console.log('ProtectedTimesheet: Rendering Timesheet component');
-  return <Layout><Timesheet /></Layout>;
+  return <Layout><Approvals /></Layout>;
 }

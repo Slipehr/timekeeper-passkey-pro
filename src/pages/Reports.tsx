@@ -76,7 +76,7 @@ export default function Reports() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { getAuthHeaders, handleApiError } = useApi();
-  const { canViewAllReports } = usePermissions();
+  const { canViewAllReports, isRole } = usePermissions();
 
   const fetchReportsData = async () => {
     try {
@@ -152,25 +152,6 @@ export default function Reports() {
     } catch (error: any) {
       console.error('Failed to fetch reports data:', error);
       handleApiError(error, 'Failed to load reports data');
-      // Use fallback data
-      setEntries([]);
-      setFilteredEntries([]);
-      setProjects([
-        'All Projects',
-        'Client A - Tax Preparation',
-        'Client B - Audit',
-        'Client C - Bookkeeping',
-        'Internal - Training',
-        'Internal - Admin',
-        'Internal - Marketing',
-      ]);
-      setUsers([
-        'All Users',
-        'John Doe',
-        'Jane Smith',
-        'Michael Johnson',
-        'Sarah Williams',
-      ]);
     }
   };
 
@@ -198,6 +179,12 @@ export default function Reports() {
 
     if (filters.user !== 'All Users') {
       filtered = filtered.filter(entry => entry.user === filters.user);
+    }
+    
+    // If user is not a manager/admin, filter to show only their own entries
+    if (!canViewAllReports && user) {
+      const currentUserName = `${user.name}` || user.email;
+      filtered = filtered.filter(entry => entry.user === currentUserName);
     }
 
     if (filters.status !== 'All Statuses') {

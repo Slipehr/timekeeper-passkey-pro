@@ -11,8 +11,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { ProtectedTimesheet } from "@/components/ProtectedTimesheet";
 import { ProtectedProjects } from "@/components/ProtectedProjects";
+import { ProtectedApprovals } from "@/components/ProtectedApprovals";
 import Reports from "./pages/Reports";
-import Approvals from "./pages/Approvals";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,11 +46,7 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/approvals" element={
-              <ProtectedRoute>
-                <RoleBasedRoute requiredRole={UserRole.MANAGER}>
-                  <Approvals />
-                </RoleBasedRoute>
-              </ProtectedRoute>
+              <ProtectedApprovals />
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>

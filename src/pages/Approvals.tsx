@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Calendar } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface TimeEntry {
   id: string;
@@ -20,6 +21,7 @@ interface TimeEntry {
 }
 
 export default function Approvals() {
+  const { canApproveTimeEntries } = usePermissions();
   const [pendingEntries, setPendingEntries] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { apiRequest, handleApiError } = useApi();
@@ -146,12 +148,16 @@ export default function Approvals() {
                       {entry.description}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => approveEntry(entry.id)}
-                      >
-                        Approve
-                      </Button>
+                      {canApproveTimeEntries() ? (
+                        <Button
+                          size="sm"
+                          onClick={() => approveEntry(entry.id)}
+                        >
+                          Approve
+                        </Button>
+                      ) : (
+                        <Badge variant="outline">View Only</Badge>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

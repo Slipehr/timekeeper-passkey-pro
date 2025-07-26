@@ -7,6 +7,7 @@ import { Users, UserPlus, Upload, Download, Edit, Trash2 } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { UserManagement } from '@/components/UserManagement';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface DashboardStats {
   totalUsers: number;
@@ -20,6 +21,7 @@ interface DashboardStats {
 }
 
 export function AdminDashboard() {
+  const { canCreateUsers } = usePermissions();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -201,7 +203,7 @@ export function AdminDashboard() {
         </TabsContent>
       </Tabs>
 
-      <UserManagement />
+      {canCreateUsers() && <UserManagement />}
     </div>
   );
 }
