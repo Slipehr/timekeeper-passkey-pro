@@ -92,28 +92,44 @@ export default function Reports() {
         }),
       ]);
 
-      if (entriesResponse.ok) {
-        const entriesData = await entriesResponse.json();
+      if (entriesResponse.ok && projectsResponse.ok) {
+        const [entriesData, projectsData] = await Promise.all([
+          entriesResponse.json(),
+          projectsResponse.json()
+        ]);
+        
         console.log('Reports raw entries:', entriesData);
         
-        // Map the API response to match our interface with new status field
-        const mappedEntries = entriesData.map((entry: any) => ({
-          id: entry.id,
-          date: entry.date,
-          hours: entry.hours,
-          project: entry.project_id || entry.project,
-          description: entry.description,
-          submitted: entry.status === "submitted" || entry.status === "approved",
-          approved: entry.status === "approved",
-          user: entry.user || 'Unknown User',
-        }));
+        // Map the API response and convert project IDs to names
+        const mappedEntries = entriesData.map((entry: any) => {
+          // Handle project field - could be ID string or full object
+          let projectName = 'Unknown Project';
+          if (typeof entry.project === 'object' && entry.project?.name) {
+            projectName = entry.project.name;
+          } else if (typeof entry.project === 'string') {
+            const project = projectsData.find((p: any) => p.id === entry.project);
+            projectName = project ? project.name : entry.project;
+          } else if (entry.project_id) {
+            const project = projectsData.find((p: any) => p.id === entry.project_id);
+            projectName = project ? project.name : entry.project_id;
+          }
+          
+          return {
+            id: entry.id,
+            date: entry.date,
+            hours: entry.hours,
+            project: projectName,
+            description: entry.description,
+            submitted: entry.status === "submitted" || entry.status === "approved",
+            approved: entry.status === "approved",
+            user: entry.user || 'Unknown User',
+          };
+        });
         
         setEntries(mappedEntries);
         setFilteredEntries(mappedEntries);
-      }
-
-      if (projectsResponse.ok) {
-        const projectsData = await projectsResponse.json();
+        
+        // Set project names for filter dropdown
         setProjects(['All Projects', ...projectsData.map((p: any) => p.name)]);
       }
 

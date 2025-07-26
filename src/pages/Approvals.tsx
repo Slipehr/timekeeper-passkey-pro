@@ -14,10 +14,8 @@ interface TimeEntry {
   hours: number;
   description: string;
   status: 'draft' | 'submitted' | 'approved';
-  project: {
-    id: string;
-    name: string;
-  };
+  project: any; // Could be ID string or object
+  projectName?: string; // Added for mapped entries
   user: {
     first_name: string;
     last_name: string;
@@ -40,8 +38,30 @@ export default function Approvals() {
   const fetchPendingEntries = async () => {
     try {
       setIsLoading(true);
-      const timeEntries = await apiRequest('http://192.168.11.3:8200/timesheets/entries');
-      const pending = timeEntries.filter((entry: any) => entry.status === 'submitted');
+      
+      // Fetch timesheet entries and projects
+      const [timeEntries, projects] = await Promise.all([
+        apiRequest('http://192.168.11.3:8200/timesheets/entries'),
+        apiRequest('http://192.168.11.3:8200/projects')
+      ]);
+      
+      const pending = timeEntries.filter((entry: any) => entry.status === 'submitted')
+        .map((entry: any) => {
+          // Handle project field - could be ID string or full object
+          let projectName = 'Unknown Project';
+          if (typeof entry.project === 'object' && entry.project?.name) {
+            projectName = entry.project.name;
+          } else if (typeof entry.project === 'string') {
+            const project = projects.find((p: any) => p.id === entry.project);
+            projectName = project ? project.name : entry.project;
+          }
+          
+          return {
+            ...entry,
+            projectName
+          };
+        });
+        
       setPendingEntries(pending);
     } catch (error: any) {
       handleApiError(error, 'Failed to fetch pending entries');
@@ -106,7 +126,7 @@ export default function Approvals() {
                       {entry.user.first_name} {entry.user.last_name}
                     </TableCell>
                      <TableCell>
-                       {typeof entry.project === 'string' ? entry.project : entry.project?.name || 'Unknown Project'}
+                       {entry.projectName || 'Unknown Project'}
                      </TableCell>
                     <TableCell>
                       <div className="flex items-center">
