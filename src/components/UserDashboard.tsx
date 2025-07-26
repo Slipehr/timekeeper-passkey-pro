@@ -20,10 +20,8 @@ interface TimeEntry {
   hours: number;
   description: string;
   status: 'draft' | 'submitted' | 'approved';
-  project: {
-    id: string;
-    name: string;
-  };
+  project: any; // Could be ID string or object
+  projectName?: string; // Added for mapped entries
 }
 
 export function UserDashboard() {
@@ -46,8 +44,11 @@ export function UserDashboard() {
     try {
       setIsLoading(true);
 
-      // Fetch user's timesheet entries
-      const timeEntries = await apiRequest('http://192.168.11.3:8200/timesheets/entries');
+      // Fetch user's timesheet entries and projects
+      const [timeEntries, projects] = await Promise.all([
+        apiRequest('http://192.168.11.3:8200/timesheets/entries'),
+        apiRequest('http://192.168.11.3:8200/projects')
+      ]);
       
       // Filter entries for current user
       const userEntries = timeEntries.filter((entry: any) => entry.user_id === user?.id);
@@ -65,8 +66,24 @@ export function UserDashboard() {
         draftEntries: drafts.length,
       });
 
-      // Show recent 5 entries
-      setRecentEntries(userEntries.slice(0, 5));
+      // Map project IDs to names for recent entries and show recent 5 entries
+      const mappedEntries = userEntries.slice(0, 5).map((entry: any) => {
+        // Handle project field - could be ID string or full object
+        let projectName = 'Unknown Project';
+        if (typeof entry.project === 'object' && entry.project?.name) {
+          projectName = entry.project.name;
+        } else if (typeof entry.project === 'string') {
+          const project = projects.find((p: any) => p.id === entry.project);
+          projectName = project ? project.name : entry.project;
+        }
+        
+        return {
+          ...entry,
+          projectName
+        };
+      });
+      
+      setRecentEntries(mappedEntries);
     } catch (error: any) {
       handleApiError(error, 'Failed to fetch dashboard data');
     } finally {
@@ -183,7 +200,7 @@ export function UserDashboard() {
                 {recentEntries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">
-                      {entry.project?.name || 'Unknown Project'}
+                      {entry.projectName || 'Unknown Project'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
