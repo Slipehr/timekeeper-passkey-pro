@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: credentials.email }),
+        body: JSON.stringify({ email: credentials.email.toLowerCase() }),
       });
 
       if (!response.ok) {

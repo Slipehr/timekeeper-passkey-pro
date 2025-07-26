@@ -131,10 +131,30 @@ export function UserManagement() {
   };
 
   const createUser = async () => {
+    // Check for duplicate email (case-insensitive)
+    const emailExists = users.some(user => 
+      user.email.toLowerCase() === formData.email.toLowerCase()
+    );
+    
+    if (emailExists) {
+      toast({
+        title: "Error",
+        description: "A user with this email already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      // Normalize email to lowercase before sending to backend
+      const normalizedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+
       await apiRequest('http://192.168.11.3:8200/auth/create-user', {
         method: 'POST',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(normalizedFormData),
       });
 
       toast({
@@ -153,10 +173,31 @@ export function UserManagement() {
   const updateUser = async () => {
     if (!editingUser) return;
 
+    // Check for duplicate email (case-insensitive), excluding current user
+    const emailExists = users.some(user => 
+      user.id !== editingUser.id && 
+      user.email.toLowerCase() === formData.email.toLowerCase()
+    );
+    
+    if (emailExists) {
+      toast({
+        title: "Error",
+        description: "A user with this email already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      // Normalize email to lowercase before sending to backend
+      const normalizedFormData = {
+        ...formData,
+        email: formData.email.toLowerCase(),
+      };
+
       await apiRequest(`http://192.168.11.3:8200/auth/${editingUser.id}`, {
         method: 'PUT',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(normalizedFormData),
       });
 
       toast({
