@@ -75,6 +75,17 @@ export default function Dashboard() {
         }));
         
         setTimeEntries(mappedEntries.slice(0, 5)); // Show only recent 5 entries
+        
+        // Calculate pending entries from actual data (fix for backend stats issue)
+        const pendingCount = mappedEntries.filter(entry => 
+          entry.submitted && !entry.approved
+        ).length;
+        
+        // Update stats with correct pending count
+        setStats(prevStats => ({
+          ...prevStats,
+          pendingEntries: pendingCount
+        }));
       }
 
       if (statsResponse.ok) {
