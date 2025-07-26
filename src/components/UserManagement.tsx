@@ -33,10 +33,7 @@ interface UserFormData {
   password: string;
 }
 
-const CSV_TEMPLATE = `email,first_name,last_name,phone_number,role
-john.doe@example.com,John,Doe,+1234567890,user
-jane.smith@example.com,Jane,Smith,+0987654321,manager
-admin@example.com,Admin,User,,administrator`;
+const CSV_TEMPLATE = `email,first_name,last_name,phone_number,role`;
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
