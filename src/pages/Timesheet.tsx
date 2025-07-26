@@ -51,15 +51,20 @@ export default function Timesheet() {
         console.log('Raw API response:', data);
         
         // Map the API response to match our interface with new status field
-        const mappedEntries = data.map((entry: any) => ({
-          id: entry.id,
-          date: entry.date,
-          hours: entry.hours,
-          project: entry.project_id || entry.project,
-          description: entry.description,
-          submitted: entry.status === "submitted" || entry.status === "approved",
-          approved: entry.status === "approved",
-        }));
+        const mappedEntries = data.map((entry: any) => {
+          console.log('Mapping timesheet entry:', entry);
+          const mapped = {
+            id: entry.id,
+            date: entry.date,
+            hours: entry.hours,
+            project: entry.project_id || entry.project,
+            description: entry.description,
+            submitted: entry.status === "submitted" || entry.status === "approved",
+            approved: entry.status === "approved",
+          };
+          console.log('Mapped timesheet entry:', mapped);
+          return mapped;
+        });
         
         console.log('Mapped entries with submitted status:', mappedEntries.map(e => ({
           id: e.id,
@@ -300,8 +305,12 @@ export default function Timesheet() {
 
   // Helper function to get project name from ID
   const getProjectName = (projectId: string): string => {
+    console.log('getProjectName called with:', projectId, typeof projectId);
     const project = projects.find(p => p.id === projectId);
-    return project ? project.name : projectId;
+    console.log('Found project:', project);
+    const result = project ? project.name : projectId;
+    console.log('Returning project name:', result, typeof result);
+    return result;
   };
 
   return (
@@ -472,8 +481,15 @@ export default function Timesheet() {
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                   >
                     <div className="space-y-1 flex-1">
-                      <div className="flex items-center space-x-3">
-                        <p className="font-medium">{getProjectName(entry.project)}</p>
+                       <div className="flex items-center space-x-3">
+                         <p className="font-medium">
+                           {(() => {
+                             console.log('Rendering project name for entry:', entry.project);
+                             const projectName = getProjectName(entry.project);
+                             console.log('Project name result:', projectName);
+                             return projectName;
+                           })()}
+                         </p>
                         <div className="flex items-center space-x-2">
                           {entry.approved && (
                             <Badge variant="default">Approved</Badge>
