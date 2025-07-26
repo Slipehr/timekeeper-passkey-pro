@@ -6,8 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Calendar } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
-import { RoleBasedRoute } from '@/components/RoleBasedRoute';
-import { UserRole } from '@/hooks/useAuth';
 
 interface TimeEntry {
   id: string;
@@ -36,6 +34,8 @@ export default function Approvals() {
   useEffect(() => {
     fetchPendingEntries();
   }, []);
+
+  // Access control is handled by RoleBasedRoute wrapper
 
   const fetchPendingEntries = async () => {
     try {
@@ -68,71 +68,69 @@ export default function Approvals() {
   };
 
   return (
-    <RoleBasedRoute requiredRole={UserRole.MANAGER}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Approvals</h1>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Time Entries</CardTitle>
-            <CardDescription>
-              Time entries awaiting your approval
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-16 bg-muted rounded animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Project</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Hours</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pendingEntries.map((entry) => (
-                    <TableRow key={entry.id}>
-                      <TableCell className="font-medium">
-                        {entry.user.first_name} {entry.user.last_name}
-                      </TableCell>
-                      <TableCell>{entry.project.name}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {new Date(entry.date).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>{entry.hours}h</TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {entry.description}
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          onClick={() => approveEntry(entry.id)}
-                        >
-                          Approve
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold tracking-tight">Approvals</h1>
       </div>
-    </RoleBasedRoute>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pending Time Entries</CardTitle>
+          <CardDescription>
+            Time entries awaiting your approval
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-16 bg-muted rounded animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Project</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Hours</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pendingEntries.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-medium">
+                      {entry.user.first_name} {entry.user.last_name}
+                    </TableCell>
+                    <TableCell>{entry.project.name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        {new Date(entry.date).toLocaleDateString()}
+                      </div>
+                    </TableCell>
+                    <TableCell>{entry.hours}h</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {entry.description}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        onClick={() => approveEntry(entry.id)}
+                      >
+                        Approve
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

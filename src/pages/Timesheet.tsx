@@ -26,7 +26,7 @@ interface TimeEntry {
 
 export default function Timesheet() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
-  const [projects, setProjects] = useState<Array<{id: string, name: string}>>([]);
+  const [projects, setProjects] = useState<Array<{id: string, name: string, status?: string}>>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -81,18 +81,17 @@ export default function Timesheet() {
       });
       if (response.ok) {
         const data = await response.json();
-        setProjects(data);
+        // Only show active projects for time entry
+        const activeProjects = data.filter((project: any) => project.status === 'active');
+        setProjects(activeProjects);
       }
     } catch (error) {
       console.error('Failed to fetch projects:', error);
-      // Fallback to default projects
+      // Fallback to default active projects
       setProjects([
-        { id: '1', name: 'Client A - Tax Preparation' },
-        { id: '2', name: 'Client B - Audit' },
-        { id: '3', name: 'Client C - Bookkeeping' },
-        { id: '4', name: 'Internal - Training' },
-        { id: '5', name: 'Internal - Admin' },
-        { id: '6', name: 'Internal - Marketing' },
+        { id: '1', name: 'Client A - Tax Preparation', status: 'active' },
+        { id: '2', name: 'Client B - Audit', status: 'active' },
+        { id: '3', name: 'Client C - Bookkeeping', status: 'active' },
       ]);
     }
   };

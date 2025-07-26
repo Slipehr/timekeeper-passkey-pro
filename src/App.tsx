@@ -9,8 +9,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { RoleBasedRoute } from "@/components/RoleBasedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import Timesheet from "./pages/Timesheet";
-import Projects from "./pages/Projects";
+import { ProtectedTimesheet } from "@/components/ProtectedTimesheet";
+import { ProtectedProjects } from "@/components/ProtectedProjects";
 import Reports from "./pages/Reports";
 import Approvals from "./pages/Approvals";
 import NotFound from "./pages/NotFound";
@@ -34,14 +34,12 @@ const App = () => (
             } />
             <Route path="/timesheet" element={
               <ProtectedRoute>
-                <Timesheet />
+                <ProtectedTimesheet />
               </ProtectedRoute>
             } />
             <Route path="/projects" element={
               <ProtectedRoute>
-                <RoleBasedRoute requiredRoles={[UserRole.MANAGER, UserRole.ADMINISTRATOR]}>
-                  <Projects />
-                </RoleBasedRoute>
+                <ProtectedProjects />
               </ProtectedRoute>
             } />
             <Route path="/reports" element={
