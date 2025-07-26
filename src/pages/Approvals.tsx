@@ -16,11 +16,7 @@ interface TimeEntry {
   status: 'draft' | 'submitted' | 'approved';
   project: any; // Could be ID string or object
   projectName?: string; // Added for mapped entries
-  user: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
+  userName?: string; // Added for mapped entries
 }
 
 export default function Approvals() {
@@ -39,10 +35,11 @@ export default function Approvals() {
     try {
       setIsLoading(true);
       
-      // Fetch timesheet entries and projects
-      const [timeEntries, projects] = await Promise.all([
+      // Fetch timesheet entries, projects, and users
+      const [timeEntries, projects, users] = await Promise.all([
         apiRequest('http://192.168.11.3:8200/timesheets/entries'),
-        apiRequest('http://192.168.11.3:8200/projects')
+        apiRequest('http://192.168.11.3:8200/projects'),
+        apiRequest('http://192.168.11.3:8200/auth/users')
       ]);
       
       const pending = timeEntries.filter((entry: any) => entry.status === 'submitted')
@@ -56,9 +53,19 @@ export default function Approvals() {
             projectName = project ? project.name : entry.project;
           }
           
+          // Map user ID to user name
+          let userName = 'Unknown User';
+          if (entry.user_id) {
+            const user = users.find((u: any) => u.id === entry.user_id);
+            if (user) {
+              userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;
+            }
+          }
+          
           return {
             ...entry,
-            projectName
+            projectName,
+            userName
           };
         });
         
@@ -123,7 +130,7 @@ export default function Approvals() {
                 {pendingEntries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">
-                      {entry.user.first_name} {entry.user.last_name}
+                      {entry.userName || 'Unknown User'}
                     </TableCell>
                      <TableCell>
                        {entry.projectName || 'Unknown Project'}

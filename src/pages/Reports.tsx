@@ -92,15 +92,16 @@ export default function Reports() {
         }),
       ]);
 
-      if (entriesResponse.ok && projectsResponse.ok) {
-        const [entriesData, projectsData] = await Promise.all([
+      if (entriesResponse.ok && projectsResponse.ok && usersResponse.ok) {
+        const [entriesData, projectsData, usersData] = await Promise.all([
           entriesResponse.json(),
-          projectsResponse.json()
+          projectsResponse.json(),
+          usersResponse.json()
         ]);
         
         console.log('Reports raw entries:', entriesData);
         
-        // Map the API response and convert project IDs to names
+        // Map the API response and convert project IDs to names and user IDs to names
         const mappedEntries = entriesData.map((entry: any) => {
           // Handle project field - could be ID string or full object
           let projectName = 'Unknown Project';
@@ -114,6 +115,15 @@ export default function Reports() {
             projectName = project ? project.name : entry.project_id;
           }
           
+          // Map user ID to user name
+          let userName = 'Unknown User';
+          if (entry.user_id) {
+            const user = usersData.find((u: any) => u.id === entry.user_id);
+            if (user) {
+              userName = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email;
+            }
+          }
+          
           return {
             id: entry.id,
             date: entry.date,
@@ -122,7 +132,7 @@ export default function Reports() {
             description: entry.description,
             submitted: entry.status === "submitted" || entry.status === "approved",
             approved: entry.status === "approved",
-            user: entry.user || 'Unknown User',
+            user: userName,
           };
         });
         
@@ -131,11 +141,13 @@ export default function Reports() {
         
         // Set project names for filter dropdown
         setProjects(['All Projects', ...projectsData.map((p: any) => p.name)]);
-      }
-
-      if (usersResponse.ok) {
-        const usersData = await usersResponse.json();
-        setUsers(['All Users', ...usersData.map((u: any) => u.name)]);
+        
+        // Set user names for filter dropdown using same mapping logic
+        const userNames = usersData.map((u: any) => {
+          const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
+          return name;
+        });
+        setUsers(['All Users', ...userNames]);
       }
     } catch (error: any) {
       console.error('Failed to fetch reports data:', error);
