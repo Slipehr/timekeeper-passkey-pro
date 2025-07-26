@@ -183,7 +183,7 @@ export function UserDashboard() {
                 {recentEntries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">
-                      {entry.project.name}
+                      {entry.project?.name || 'Unknown Project'}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
