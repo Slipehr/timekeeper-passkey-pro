@@ -367,9 +367,12 @@ export default function Timesheet() {
                      <SelectContent>
                        {projects.map((project) => {
                          console.log('Mapping project:', project);
+                         // Ensure we're only using primitive values for React
+                         const projectId = String(project.id);
+                         const projectName = String(project.name);
                          return (
-                           <SelectItem key={project.id} value={project.id}>
-                             {project.name}
+                           <SelectItem key={projectId} value={projectId}>
+                             {projectName}
                            </SelectItem>
                          );
                        })}
