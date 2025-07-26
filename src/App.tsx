@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Timesheet from "./pages/Timesheet";
 import Projects from "./pages/Projects";
 import Reports from "./pages/Reports";
+import Approvals from "./pages/Approvals";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,13 @@ const App = () => (
               <ProtectedRoute>
                 <RoleBasedRoute requiredRoles={[UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR]}>
                   <Reports />
+                </RoleBasedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/approvals" element={
+              <ProtectedRoute>
+                <RoleBasedRoute requiredRole={UserRole.MANAGER}>
+                  <Approvals />
                 </RoleBasedRoute>
               </ProtectedRoute>
             } />
