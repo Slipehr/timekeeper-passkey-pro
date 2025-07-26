@@ -33,14 +33,10 @@ const App = () => (
               </ProtectedRoute>
             } />
             <Route path="/timesheet" element={
-              <ProtectedRoute>
-                <ProtectedTimesheet />
-              </ProtectedRoute>
+              <ProtectedTimesheet />
             } />
             <Route path="/projects" element={
-              <ProtectedRoute>
-                <ProtectedProjects />
-              </ProtectedRoute>
+              <ProtectedProjects />
             } />
             <Route path="/reports" element={
               <ProtectedRoute>
