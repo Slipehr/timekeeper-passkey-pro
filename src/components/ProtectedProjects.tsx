@@ -1,6 +1,7 @@
 import { usePermissions } from '@/hooks/usePermissions';
 import { UserRole } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Layout } from '@/components/Layout';
 import Projects from '@/pages/Projects';
 
 export function ProtectedProjects() {
@@ -22,5 +23,5 @@ export function ProtectedProjects() {
     );
   }
 
-  return <Projects />;
+  return <Layout><Projects /></Layout>;
 }

@@ -1,6 +1,7 @@
 import { usePermissions } from '@/hooks/usePermissions';
 import { UserRole } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Layout } from '@/components/Layout';
 import Timesheet from '@/pages/Timesheet';
 
 export function ProtectedTimesheet() {
@@ -25,5 +26,5 @@ export function ProtectedTimesheet() {
   }
 
   console.log('ProtectedTimesheet: Rendering Timesheet component');
-  return <Timesheet />;
+  return <Layout><Timesheet /></Layout>;
 }
