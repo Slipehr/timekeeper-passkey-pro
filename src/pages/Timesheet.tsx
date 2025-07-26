@@ -53,11 +53,24 @@ export default function Timesheet() {
         // Map the API response to match our interface with new status field
         const mappedEntries = data.map((entry: any) => {
           console.log('Mapping timesheet entry:', entry);
+          
+          // Handle project field - could be ID string or full object
+          let projectId: string;
+          if (typeof entry.project === 'object' && entry.project?.id) {
+            projectId = entry.project.id;
+          } else if (typeof entry.project === 'string') {
+            projectId = entry.project;
+          } else if (entry.project_id) {
+            projectId = entry.project_id;
+          } else {
+            projectId = 'unknown';
+          }
+          
           const mapped = {
             id: entry.id,
             date: entry.date,
             hours: entry.hours,
-            project: entry.project_id || entry.project,
+            project: projectId,
             description: entry.description,
             submitted: entry.status === "submitted" || entry.status === "approved",
             approved: entry.status === "approved",
