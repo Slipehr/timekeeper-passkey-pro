@@ -28,6 +28,7 @@ const navigation = [
   { name: 'Projects', href: '/projects', icon: Building, color: 'text-amber', roles: [UserRole.MANAGER] },
   { name: 'Approvals', href: '/approvals', icon: FileText, color: 'text-blue', roles: [UserRole.AUDIT, UserRole.MANAGER] },
   { name: 'Reports', href: '/reports', icon: FileText, color: 'text-violet', roles: [UserRole.AUDIT, UserRole.MANAGER] },
+  { name: 'User Management', href: '/admin', icon: FileText, color: 'text-red', roles: [UserRole.ADMINISTRATOR] },
 ];
 
 export function AppSidebar() {
