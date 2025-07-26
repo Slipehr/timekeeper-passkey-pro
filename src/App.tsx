@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import { ProtectedTimesheet } from "@/components/ProtectedTimesheet";
 import { ProtectedProjects } from "@/components/ProtectedProjects";
 import { ProtectedApprovals } from "@/components/ProtectedApprovals";
+import { AdminDashboard } from "@/components/AdminDashboard";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +48,13 @@ const App = () => (
             } />
             <Route path="/approvals" element={
               <ProtectedApprovals />
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <RoleBasedRoute requiredRoles={[UserRole.ADMINISTRATOR]}>
+                  <AdminDashboard />
+                </RoleBasedRoute>
+              </ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>

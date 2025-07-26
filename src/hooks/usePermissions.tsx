@@ -1,23 +1,17 @@
 import { useAuth, UserRole } from './useAuth';
 
-const ROLE_HIERARCHY = {
-  [UserRole.USER]: 1,
-  [UserRole.AUDIT]: 2,
-  [UserRole.MANAGER]: 3,
-  [UserRole.ADMINISTRATOR]: 4,
-};
-
 export function usePermissions() {
   const { user } = useAuth();
 
+  // Exact role matching - no hierarchy
   const hasRole = (requiredRole: UserRole): boolean => {
     if (!user) return false;
-    return ROLE_HIERARCHY[user.role] >= ROLE_HIERARCHY[requiredRole];
+    return user.role === requiredRole;
   };
 
   const hasAnyRole = (roles: UserRole[]): boolean => {
     if (!user) return false;
-    return roles.some(role => hasRole(role));
+    return roles.includes(user.role);
   };
 
   const isRole = (role: UserRole): boolean => {
