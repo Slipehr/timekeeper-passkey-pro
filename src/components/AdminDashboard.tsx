@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, Upload, Download, Edit, Trash2 } from 'lucide-react';
+import { Users, UserPlus, UserCheck, Shield, UserCog } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
-import { UserManagement } from '@/components/UserManagement';
-import { usePermissions } from '@/hooks/usePermissions';
+import { UserRole } from '@/hooks/useAuth';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
   totalUsers: number;
@@ -18,10 +16,12 @@ interface DashboardStats {
   newUsersMonth: number;
   newUsersQuarter: number;
   newUsersYear: number;
+  roleDistribution: {
+    [key in UserRole]: number;
+  };
 }
 
 export function AdminDashboard() {
-  const { canCreateUsers } = usePermissions();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -31,6 +31,12 @@ export function AdminDashboard() {
     newUsersMonth: 0,
     newUsersQuarter: 0,
     newUsersYear: 0,
+    roleDistribution: {
+      [UserRole.USER]: 0,
+      [UserRole.AUDIT]: 0,
+      [UserRole.MANAGER]: 0,
+      [UserRole.ADMINISTRATOR]: 0,
+    },
   });
   const [isLoading, setIsLoading] = useState(true);
   const { apiRequest, handleApiError } = useApi();
@@ -54,6 +60,14 @@ export function AdminDashboard() {
       const quarterAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
       const yearAgo = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
 
+      // Calculate role distribution
+      const roleDistribution = {
+        [UserRole.USER]: users.filter((user: any) => user.role === UserRole.USER).length,
+        [UserRole.AUDIT]: users.filter((user: any) => user.role === UserRole.AUDIT).length,
+        [UserRole.MANAGER]: users.filter((user: any) => user.role === UserRole.MANAGER).length,
+        [UserRole.ADMINISTRATOR]: users.filter((user: any) => user.role === UserRole.ADMINISTRATOR).length,
+      };
+
       const userStats = {
         totalUsers: users.length,
         activeUsers: users.filter((user: any) => user.last_login_at).length,
@@ -63,6 +77,7 @@ export function AdminDashboard() {
         newUsersMonth: users.filter((user: any) => new Date(user.registered_at) >= monthAgo).length,
         newUsersQuarter: users.filter((user: any) => new Date(user.registered_at) >= quarterAgo).length,
         newUsersYear: users.filter((user: any) => new Date(user.registered_at) >= yearAgo).length,
+        roleDistribution,
       };
 
       setStats(userStats);
@@ -203,7 +218,112 @@ export function AdminDashboard() {
         </TabsContent>
       </Tabs>
 
-      {canCreateUsers() && <UserManagement />}
+      {/* Role Distribution Charts */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>User Roles Distribution</CardTitle>
+            <CardDescription>Distribution of users by role</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: 'Users', value: stats.roleDistribution[UserRole.USER], fill: '#8884d8' },
+                    { name: 'Audit', value: stats.roleDistribution[UserRole.AUDIT], fill: '#82ca9d' },
+                    { name: 'Managers', value: stats.roleDistribution[UserRole.MANAGER], fill: '#ffc658' },
+                    { name: 'Administrators', value: stats.roleDistribution[UserRole.ADMINISTRATOR], fill: '#ff7c7c' },
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  <Cell fill="#8884d8" />
+                  <Cell fill="#82ca9d" />
+                  <Cell fill="#ffc658" />
+                  <Cell fill="#ff7c7c" />
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Role Statistics</CardTitle>
+            <CardDescription>Number of users per role</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  { role: 'Users', count: stats.roleDistribution[UserRole.USER], icon: '👤' },
+                  { role: 'Audit', count: stats.roleDistribution[UserRole.AUDIT], icon: '🔍' },
+                  { role: 'Managers', count: stats.roleDistribution[UserRole.MANAGER], icon: '👔' },
+                  { role: 'Admins', count: stats.roleDistribution[UserRole.ADMINISTRATOR], icon: '🛡️' },
+                ]}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="role" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Role Overview Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Regular Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.roleDistribution[UserRole.USER]}</div>
+            <p className="text-xs text-muted-foreground">Standard user access</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Audit Users</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.roleDistribution[UserRole.AUDIT]}</div>
+            <p className="text-xs text-muted-foreground">Can review and audit</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Managers</CardTitle>
+            <UserCog className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.roleDistribution[UserRole.MANAGER]}</div>
+            <p className="text-xs text-muted-foreground">Management access</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Administrators</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.roleDistribution[UserRole.ADMINISTRATOR]}</div>
+            <p className="text-xs text-muted-foreground">Full system access</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

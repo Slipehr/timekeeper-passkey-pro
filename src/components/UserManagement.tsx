@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { UserPlus, Upload, Edit, Trash2, Download } from 'lucide-react';
+import { UserPlus, Upload, Edit, Trash2, Download, Search, X } from 'lucide-react';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/hooks/useAuth';
@@ -40,12 +40,20 @@ admin@example.com,Admin,User,,administrator`;
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [csvContent, setCsvContent] = useState('');
+  const [filters, setFilters] = useState({
+    name: '',
+    email: '',
+    role: '',
+    registered: '',
+    lastLogin: '',
+  });
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     first_name: '',
@@ -67,11 +75,62 @@ export function UserManagement() {
       setIsLoading(true);
       const response = await apiRequest('http://192.168.11.3:8200/auth/users');
       setUsers(response);
+      setFilteredUsers(response);
     } catch (error: any) {
       handleApiError(error, 'Failed to fetch users');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Filter users based on current filters
+  useEffect(() => {
+    let filtered = users;
+
+    if (filters.name) {
+      filtered = filtered.filter(user => 
+        `${user.first_name} ${user.last_name}`.toLowerCase().includes(filters.name.toLowerCase())
+      );
+    }
+
+    if (filters.email) {
+      filtered = filtered.filter(user => 
+        user.email.toLowerCase().includes(filters.email.toLowerCase())
+      );
+    }
+
+    if (filters.role) {
+      filtered = filtered.filter(user => 
+        user.role.toLowerCase().includes(filters.role.toLowerCase())
+      );
+    }
+
+    if (filters.registered) {
+      filtered = filtered.filter(user => 
+        new Date(user.registered_at).toLocaleDateString().includes(filters.registered)
+      );
+    }
+
+    if (filters.lastLogin) {
+      filtered = filtered.filter(user => {
+        const lastLogin = user.last_login_at 
+          ? new Date(user.last_login_at).toLocaleDateString()
+          : 'Never';
+        return lastLogin.toLowerCase().includes(filters.lastLogin.toLowerCase());
+      });
+    }
+
+    setFilteredUsers(filtered);
+  }, [users, filters]);
+
+  const clearFilters = () => {
+    setFilters({
+      name: '',
+      email: '',
+      role: '',
+      registered: '',
+      lastLogin: '',
+    });
   };
 
   const createUser = async () => {
@@ -437,6 +496,91 @@ export function UserManagement() {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Filters Section */}
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Filter Users</h3>
+            <Button variant="outline" size="sm" onClick={clearFilters}>
+              <X className="h-4 w-4 mr-2" />
+              Clear Filters
+            </Button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            <div className="space-y-2">
+              <Label htmlFor="filter-name">Name</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="filter-name"
+                  placeholder="Filter by name..."
+                  value={filters.name}
+                  onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="filter-email">Email</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="filter-email"
+                  placeholder="Filter by email..."
+                  value={filters.email}
+                  onChange={(e) => setFilters({ ...filters, email: e.target.value })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="filter-role">Role</Label>
+              <Select value={filters.role} onValueChange={(value) => setFilters({ ...filters, role: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All roles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All roles</SelectItem>
+                  <SelectItem value={UserRole.USER}>User</SelectItem>
+                  <SelectItem value={UserRole.AUDIT}>Audit</SelectItem>
+                  <SelectItem value={UserRole.MANAGER}>Manager</SelectItem>
+                  <SelectItem value={UserRole.ADMINISTRATOR}>Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="filter-registered">Registered Date</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="filter-registered"
+                  placeholder="Filter by date..."
+                  value={filters.registered}
+                  onChange={(e) => setFilters({ ...filters, registered: e.target.value })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="filter-lastLogin">Last Login</Label>
+              <div className="relative">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="filter-lastLogin"
+                  placeholder="Filter by login..."
+                  value={filters.lastLogin}
+                  onChange={(e) => setFilters({ ...filters, lastLogin: e.target.value })}
+                  className="pl-8"
+                />
+              </div>
+            </div>
+          </div>
+          {(filters.name || filters.email || filters.role || filters.registered || filters.lastLogin) && (
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredUsers.length} of {users.length} users
+            </div>
+          )}
+        </div>
+
         {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
@@ -456,7 +600,7 @@ export function UserManagement() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
                     {user.first_name} {user.last_name}
