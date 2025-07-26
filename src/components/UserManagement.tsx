@@ -531,12 +531,12 @@ export function UserManagement() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="filter-role">Role</Label>
-              <Select value={filters.role} onValueChange={(value) => setFilters({ ...filters, role: value })}>
+              <Select value={filters.role} onValueChange={(value) => setFilters({ ...filters, role: value === "all" ? "" : value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="All roles" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All roles</SelectItem>
+                  <SelectItem value="all">All roles</SelectItem>
                   <SelectItem value={UserRole.USER}>User</SelectItem>
                   <SelectItem value={UserRole.AUDIT}>Audit</SelectItem>
                   <SelectItem value={UserRole.MANAGER}>Manager</SelectItem>
