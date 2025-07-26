@@ -82,18 +82,30 @@ export default function Timesheet() {
       });
       if (response.ok) {
         const data = await response.json();
-        // Only show active projects for time entry
-        const activeProjects = data.filter((project: any) => project.status === 'active');
-        setProjects(activeProjects);
+        console.log('Raw API response for projects:', data);
+        
+        // Transform and validate project data to prevent React rendering errors
+        const validatedProjects = Array.isArray(data) ? data
+          .filter((project: any) => project.status === 'active')
+          .map(project => {
+            // Only keep the properties we need and ensure they're simple values
+            const validatedProject = {
+              id: String(project.id || ''),
+              name: String(project.name || 'Unnamed Project'),
+              status: String(project.status || 'active')
+            };
+            console.log('Transformed project:', validatedProject);
+            return validatedProject;
+          })
+          .filter(project => project.id && project.name) : [];
+        
+        console.log('Final validated projects:', validatedProjects);
+        setProjects(validatedProjects);
       }
     } catch (error) {
       console.error('Failed to fetch projects:', error);
-      // Fallback to default active projects
-      setProjects([
-        { id: '1', name: 'Client A - Tax Preparation', status: 'active' },
-        { id: '2', name: 'Client B - Audit', status: 'active' },
-        { id: '3', name: 'Client C - Bookkeeping', status: 'active' },
-      ]);
+      // Set empty array as fallback to prevent rendering errors
+      setProjects([]);
     }
   };
 
