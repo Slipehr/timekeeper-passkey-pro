@@ -25,9 +25,9 @@ import { cn } from '@/lib/utils';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3, color: 'text-primary', roles: [UserRole.USER, UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR] },
   { name: 'Timesheet', href: '/timesheet', icon: Clock, color: 'text-emerald', roles: [UserRole.USER, UserRole.MANAGER] },
-  { name: 'Projects', href: '/projects', icon: Building, color: 'text-amber', roles: [UserRole.MANAGER, UserRole.ADMINISTRATOR] },
+  { name: 'Projects', href: '/projects', icon: Building, color: 'text-amber', roles: [UserRole.MANAGER] },
   { name: 'Approvals', href: '/approvals', icon: FileText, color: 'text-blue', roles: [UserRole.AUDIT, UserRole.MANAGER] },
-  { name: 'Reports', href: '/reports', icon: FileText, color: 'text-violet', roles: [UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR] },
+  { name: 'Reports', href: '/reports', icon: FileText, color: 'text-violet', roles: [UserRole.AUDIT, UserRole.MANAGER] },
 ];
 
 export function AppSidebar() {

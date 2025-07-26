@@ -40,7 +40,7 @@ const App = () => (
             } />
             <Route path="/reports" element={
               <ProtectedRoute>
-                <RoleBasedRoute requiredRoles={[UserRole.AUDIT, UserRole.MANAGER, UserRole.ADMINISTRATOR]}>
+                <RoleBasedRoute requiredRoles={[UserRole.AUDIT, UserRole.MANAGER]}>
                   <Reports />
                 </RoleBasedRoute>
               </ProtectedRoute>
