@@ -81,7 +81,7 @@ export default function Reports() {
   const fetchReportsData = async () => {
     try {
       const [entriesResponse, projectsResponse, usersResponse] = await Promise.all([
-        fetch('http://192.168.11.3:8200/timesheets', {
+        fetch('http://192.168.11.3:8200/timesheets/entries', {
           headers: getAuthHeaders(),
         }),
         fetch('http://192.168.11.3:8200/projects', {
