@@ -170,15 +170,42 @@ export function AdminDashboard() {
         </TabsList>
 
         <TabsContent value="weekly" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>New Users This Week</CardTitle>
-              <CardDescription>Users registered in the last 7 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold">{stats.newUsersWeek}</div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>New Users This Week</CardTitle>
+                <CardDescription>Users registered in the last 7 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold">{stats.newUsersWeek}</div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Role Distribution</CardTitle>
+                <CardDescription>Total users by role in the system</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Users</span>
+                  <span className="font-semibold">{stats.roleDistribution[UserRole.USER]}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Audit</span>
+                  <span className="font-semibold">{stats.roleDistribution[UserRole.AUDIT]}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Managers</span>
+                  <span className="font-semibold">{stats.roleDistribution[UserRole.MANAGER]}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Administrators</span>
+                  <span className="font-semibold">{stats.roleDistribution[UserRole.ADMINISTRATOR]}</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="monthly" className="space-y-4">
