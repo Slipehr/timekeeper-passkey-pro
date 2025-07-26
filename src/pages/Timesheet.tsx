@@ -25,6 +25,7 @@ interface TimeEntry {
 
 
 export default function Timesheet() {
+  console.log('Timesheet: Component starting to render');
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [projects, setProjects] = useState<Array<{id: string, name: string, status?: string}>>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -351,13 +352,16 @@ export default function Timesheet() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {projects.map((project) => (
-                        <SelectItem key={project.id} value={project.id}>
-                          {project.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                     <SelectContent>
+                       {projects.map((project) => {
+                         console.log('Mapping project:', project);
+                         return (
+                           <SelectItem key={project.id} value={project.id}>
+                             {project.name}
+                           </SelectItem>
+                         );
+                       })}
+                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">

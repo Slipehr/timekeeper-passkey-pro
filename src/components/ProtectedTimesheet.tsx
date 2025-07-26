@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Timesheet from '@/pages/Timesheet';
 
 export function ProtectedTimesheet() {
+  console.log('ProtectedTimesheet: Starting render');
   const { user, hasAnyRole } = usePermissions();
+  console.log('ProtectedTimesheet: User and permissions loaded', { user, hasAnyRole });
 
   // Only allow users and managers to access timesheet
   if (!hasAnyRole([UserRole.USER, UserRole.MANAGER])) {
@@ -22,5 +24,6 @@ export function ProtectedTimesheet() {
     );
   }
 
+  console.log('ProtectedTimesheet: Rendering Timesheet component');
   return <Timesheet />;
 }
