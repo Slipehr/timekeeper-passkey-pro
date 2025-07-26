@@ -13,6 +13,7 @@ import { ProtectedTimesheet } from "@/components/ProtectedTimesheet";
 import { ProtectedProjects } from "@/components/ProtectedProjects";
 import { ProtectedApprovals } from "@/components/ProtectedApprovals";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { UserManagement } from "@/components/UserManagement";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,13 @@ const App = () => (
               <ProtectedRoute>
                 <RoleBasedRoute requiredRoles={[UserRole.ADMINISTRATOR]}>
                   <AdminDashboard />
+                </RoleBasedRoute>
+              </ProtectedRoute>
+            } />
+            <Route path="/users" element={
+              <ProtectedRoute>
+                <RoleBasedRoute requiredRoles={[UserRole.ADMINISTRATOR]}>
+                  <UserManagement />
                 </RoleBasedRoute>
               </ProtectedRoute>
             } />
