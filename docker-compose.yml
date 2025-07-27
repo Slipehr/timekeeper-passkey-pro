@@ -1,0 +1,22 @@
+---
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: timekeeper-frontend
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.timekeeper-front.rule=Host(`time.krilee.se`) && PathPrefix(`/`)
+      - traefik.constraint-label=traefik-public
+      - traefik.http.routers.timekeeper-front.entrypoints=https
+      - traefik.http.routers.timekeeper-front.tls=true
+      - traefik.http.services.timekeeper-front.loadbalancer.server.port=3000
+networks:
+  traefik-public:
+    external: true

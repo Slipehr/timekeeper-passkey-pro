@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkEnvironment = async () => {
       try {
-        const response = await fetch('http://192.168.11.3:8200/auth/environment');
+        const response = await fetch('/auth/environment');
         if (response.ok) {
           const data = await response.json();
           setIsProduction(data.environment === 'production');
@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkBootstrapStatus = async () => {
       try {
-        const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-status');
+        const response = await fetch('/auth/bootstrap-status');
         if (response.ok) {
           const data = await response.json();
           setIsBootstrapped(data.bootstrapped);
@@ -101,8 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Use appropriate endpoint based on environment
       const endpoint = isProduction 
-        ? 'http://192.168.11.3:8200/auth/login-password'
-        : 'http://192.168.11.3:8200/auth/dev-login';
+        ? '/auth/login-password'
+        : '/auth/dev-login';
       
       const body = isProduction 
         ? { email: credentials.email.toLowerCase(), password: credentials.password }
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       // Get user details using the token
-      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+      const userResponse = await fetch('/auth/me', {
         headers: {
           'Authorization': `Bearer ${data.access_token}`,
         },
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Start WebAuthn authentication flow
-      const response = await fetch('http://192.168.11.3:8200/auth/passkey-login', {
+      const response = await fetch('/auth/passkey-login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       // Get user details using the token
-      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+      const userResponse = await fetch('/auth/me', {
         headers: {
           'Authorization': `Bearer ${data.access_token}`,
         },
@@ -210,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       
-      const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-admin', {
+      const response = await fetch('/auth/bootstrap-admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

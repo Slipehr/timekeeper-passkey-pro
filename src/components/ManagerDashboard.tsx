@@ -50,9 +50,9 @@ export function ManagerDashboard() {
 
       // Fetch timesheet entries, projects, and users
       const [timeEntries, projects, users] = await Promise.all([
-        apiRequest('http://192.168.11.3:8200/timesheets/entries'),
-        apiRequest('http://192.168.11.3:8200/projects'),
-        apiRequest('http://192.168.11.3:8200/auth/users')
+        apiRequest('/timesheets/entries'),
+        apiRequest('/projects'),
+        apiRequest('/auth/users')
       ]);
 
       // Calculate stats
@@ -105,7 +105,7 @@ export function ManagerDashboard() {
 
   const approveEntry = async (entryId: string) => {
     try {
-      await apiRequest(`http://192.168.11.3:8200/timesheets/${entryId}/approve`, {
+      await apiRequest(`/timesheets/${entryId}/approve`, {
         method: 'PUT',
       });
 

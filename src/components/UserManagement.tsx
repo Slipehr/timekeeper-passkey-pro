@@ -70,7 +70,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('http://192.168.11.3:8200/auth/users');
+      const response = await apiRequest('/auth/users');
       setUsers(response);
       setFilteredUsers(response);
     } catch (error: any) {
@@ -138,7 +138,7 @@ export function UserManagement() {
         email: formData.email.toLowerCase(),
       };
 
-      const response = await apiRequest('http://192.168.11.3:8200/auth/create-user', {
+      const response = await apiRequest('/auth/create-user', {
         method: 'POST',
         body: JSON.stringify(normalizedFormData),
       });
@@ -230,7 +230,7 @@ export function UserManagement() {
       const formData = new FormData();
       formData.append('file', blob, 'users.csv');
 
-      const response = await fetch('http://192.168.11.3:8200/auth/users/bulk-upload', {
+      const response = await fetch('/auth/users/bulk-upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
