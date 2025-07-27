@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const { user, login, loginWithPasskey, isLoading } = useAuth();
+  const { user, login, loginWithPasskey, isLoading, isProduction } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -139,7 +139,17 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6">
+        <div className="text-center mt-6 space-y-2">
+          {isProduction === false && (
+            <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
+              <p className="text-yellow-100 text-sm font-medium">
+                Development Mode
+              </p>
+              <p className="text-yellow-100/80 text-xs mt-1">
+                Any email can be used for login
+              </p>
+            </div>
+          )}
           <p className="text-white/60 text-sm">
             Demo credentials: any email + any password
           </p>

@@ -22,6 +22,7 @@ interface AuthContextType {
   loginWithPasskey: () => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isProduction: boolean | null;
 }
 
 interface LoginCredentials {
@@ -192,6 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loginWithPasskey,
       logout,
       isLoading,
+      isProduction,
     }}>
       {children}
     </AuthContext.Provider>
