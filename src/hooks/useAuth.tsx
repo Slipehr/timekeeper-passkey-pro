@@ -42,25 +42,51 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProduction, setIsProduction] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const checkEnvironment = async () => {
+      try {
+        const response = await fetch('http://192.168.11.3:8200/auth/environment');
+        if (response.ok) {
+          const data = await response.json();
+          setIsProduction(data.environment === 'production');
+        }
+      } catch (error) {
+        console.error('Failed to check environment:', error);
+        // Default to production behavior if environment check fails
+        setIsProduction(true);
+      }
+    };
+
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    
+    checkEnvironment();
     setIsLoading(false);
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
     try {
       setIsLoading(true);
-      // Try dev-login endpoint from your backend
-      const response = await fetch('http://192.168.11.3:8200/auth/dev-login', {
+      
+      // Use appropriate endpoint based on environment
+      const endpoint = isProduction 
+        ? 'http://192.168.11.3:8200/auth/login-password'
+        : 'http://192.168.11.3:8200/auth/dev-login';
+      
+      const body = isProduction 
+        ? { email: credentials.email.toLowerCase(), password: credentials.password }
+        : { email: credentials.email.toLowerCase() };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: credentials.email.toLowerCase() }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -77,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (userResponse.ok) {
-      const userData = await userResponse.json();
+        const userData = await userResponse.json();
         const user: User = {
           id: userData.id,
           name: userData.email.split('@')[0], // Extract name from email
