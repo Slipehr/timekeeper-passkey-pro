@@ -20,14 +20,24 @@ interface AuthContextType {
   user: User | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   loginWithPasskey: () => Promise<void>;
+  bootstrapAdmin: (adminData: BootstrapAdminData) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   isProduction: boolean | null;
+  isBootstrapped: boolean | null;
 }
 
 interface LoginCredentials {
   email: string;
   password: string;
+}
+
+interface BootstrapAdminData {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  phone_number?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProduction, setIsProduction] = useState<boolean | null>(null);
+  const [isBootstrapped, setIsBootstrapped] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkEnvironment = async () => {
@@ -60,12 +71,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const checkBootstrapStatus = async () => {
+      try {
+        const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-status');
+        if (response.ok) {
+          const data = await response.json();
+          setIsBootstrapped(data.bootstrapped);
+        }
+      } catch (error) {
+        console.error('Failed to check bootstrap status:', error);
+        // Default to bootstrapped if check fails
+        setIsBootstrapped(true);
+      }
+    };
+
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     
     checkEnvironment();
+    checkBootstrapStatus();
     setIsLoading(false);
   }, []);
 
@@ -180,6 +206,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const bootstrapAdmin = async (adminData: BootstrapAdminData) => {
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: adminData.email.toLowerCase(),
+          password: adminData.password,
+          first_name: adminData.first_name,
+          last_name: adminData.last_name,
+          phone_number: adminData.phone_number,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Bootstrap admin creation failed');
+      }
+
+      // Update bootstrap status
+      setIsBootstrapped(true);
+    } catch (error) {
+      console.error('Bootstrap admin creation failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -191,9 +249,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       login,
       loginWithPasskey,
+      bootstrapAdmin,
       logout,
       isLoading,
       isProduction,
+      isBootstrapped,
     }}>
       {children}
     </AuthContext.Provider>

@@ -10,10 +10,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const { user, login, loginWithPasskey, isLoading, isProduction } = useAuth();
+  const { user, login, loginWithPasskey, bootstrapAdmin, isLoading, isProduction, isBootstrapped } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [adminData, setAdminData] = useState({
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+  });
 
   // Redirect if already logged in
   if (user) {
@@ -55,6 +62,23 @@ export default function Login() {
     }
   };
 
+  const handleBootstrapAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await bootstrapAdmin(adminData);
+      toast({
+        title: "Admin created successfully",
+        description: "You can now log in with your admin credentials.",
+      });
+    } catch (error) {
+      toast({
+        title: "Admin creation failed",
+        description: "Please check your details and try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-primary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -67,76 +91,160 @@ export default function Login() {
         </div>
 
         <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle>Sign In</CardTitle>
-            <CardDescription>
-              Access your timesheet dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="email" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="email">Email</TabsTrigger>
-                <TabsTrigger value="passkey">Passkey</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="email" className="space-y-4">
-                <form onSubmit={handleLogin} className="space-y-4">
+          {isBootstrapped === false ? (
+            <>
+              <CardHeader>
+                <CardTitle>Setup Administrator</CardTitle>
+                <CardDescription>
+                  Create the first administrator account to get started
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleBootstrapAdmin} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input
+                        id="first_name"
+                        type="text"
+                        placeholder="Enter first name"
+                        value={adminData.first_name}
+                        onChange={(e) => setAdminData(prev => ({ ...prev, first_name: e.target.value }))}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input
+                        id="last_name"
+                        type="text"
+                        placeholder="Enter last name"
+                        value={adminData.last_name}
+                        onChange={(e) => setAdminData(prev => ({ ...prev, last_name: e.target.value }))}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="admin_email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="email"
+                        id="admin_email"
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="Enter admin email"
                         className="pl-10"
-                        value={credentials.email}
-                        onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+                        value={adminData.email}
+                        onChange={(e) => setAdminData(prev => ({ ...prev, email: e.target.value }))}
                         required
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="admin_password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="password"
+                        id="admin_password"
                         type="password"
-                        placeholder="Enter your password"
+                        placeholder="Enter admin password"
                         className="pl-10"
-                        value={credentials.password}
-                        onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                        value={adminData.password}
+                        onChange={(e) => setAdminData(prev => ({ ...prev, password: e.target.value }))}
                         required
                       />
                     </div>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone_number">Phone Number (Optional)</Label>
+                    <Input
+                      id="phone_number"
+                      type="tel"
+                      placeholder="Enter phone number"
+                      value={adminData.phone_number}
+                      onChange={(e) => setAdminData(prev => ({ ...prev, phone_number: e.target.value }))}
+                    />
+                  </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Signing in...' : 'Sign in with Email'}
+                    {isLoading ? 'Creating Admin...' : 'Create Administrator'}
                   </Button>
                 </form>
-              </TabsContent>
-              
-              <TabsContent value="passkey" className="space-y-4">
-                <div className="text-center space-y-4">
-                  <div className="flex justify-center">
-                    <Fingerprint className="h-16 w-16 text-primary" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Use your fingerprint, face, or security key to sign in securely.
-                  </p>
-                  <Button 
-                    onClick={handlePasskeyLogin} 
-                    className="w-full" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Authenticating...' : 'Sign in with Passkey'}
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
+              </CardContent>
+            </>
+          ) : (
+            <>
+              <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+                <CardDescription>
+                  Access your timesheet dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="email" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="email">Email</TabsTrigger>
+                    <TabsTrigger value="passkey">Passkey</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="email" className="space-y-4">
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="Enter your email"
+                            className="pl-10"
+                            value={credentials.email}
+                            onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="password"
+                            type="password"
+                            placeholder="Enter your password"
+                            className="pl-10"
+                            value={credentials.password}
+                            onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading ? 'Signing in...' : 'Sign in with Email'}
+                      </Button>
+                    </form>
+                  </TabsContent>
+                  
+                  <TabsContent value="passkey" className="space-y-4">
+                    <div className="text-center space-y-4">
+                      <div className="flex justify-center">
+                        <Fingerprint className="h-16 w-16 text-primary" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Use your fingerprint, face, or security key to sign in securely.
+                      </p>
+                      <Button 
+                        onClick={handlePasskeyLogin} 
+                        className="w-full" 
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Authenticating...' : 'Sign in with Passkey'}
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </>
+          )}
         </Card>
 
         <div className="text-center mt-6 space-y-2">
