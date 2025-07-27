@@ -6,6 +6,7 @@ import { Clock, TrendingUp, CheckCircle, AlertCircle, Calendar } from 'lucide-re
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { getBaseUrl } from "../utils/getBaseUrl";
 
 interface DashboardStats {
   totalHours: number;
@@ -46,8 +47,8 @@ export function UserDashboard() {
 
       // Fetch user's timesheet entries and projects
       const [timeEntries, projects] = await Promise.all([
-        apiRequest('/timesheets/entries'),
-        apiRequest('/projects')
+        apiRequest(`${getBaseUrl()}/timesheets/entries`),
+        apiRequest(`${getBaseUrl()}/projects`)
       ]);
       
       // Filter entries for current user

@@ -1,24 +1,6 @@
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
 
-function getBaseUrl(): string {
-  const origin = window.location.origin;
-
-  if (origin.startsWith('https://time.krilee.se')) {
-    return 'https://time-api.krilee.se';
-  }
-
-  if (
-    origin.startsWith('http://192.168.11.3:3000') ||
-    origin.startsWith('http://localhost:3000')
-  ) {
-    return 'http://192.168.11.3:8200';
-  }
-
-  // Default fallback
-  return 'http://192.168.11.3:8200';
-}
-
 export function useApi() {
   const { logout } = useAuth();
   const { toast } = useToast();
@@ -58,11 +40,9 @@ export function useApi() {
     });
   };
 
-  const apiRequest = async (path: string, options: RequestInit = {}) => {
-    const fullUrl = `${getBaseUrl()}${path}`;
-    console.log("FETCHING:", fullUrl);
+  const apiRequest = async (url: string, options: RequestInit = {}) => {
     try {
-      const response = await fetch(fullUrl, {
+      const response = await fetch(url, {
         ...options,
         headers: {
           ...getAuthHeaders(),
@@ -96,4 +76,3 @@ export function useApi() {
     apiRequest,
   };
 }
-

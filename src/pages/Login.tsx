@@ -259,7 +259,7 @@ export default function Login() {
             </div>
           )}
           <p className="text-white/60 text-sm">
-            © {new Date().getFullYear()} dahlberg.ninja. All rights reserved.
+            Demo credentials: any email + any password
           </p>
         </div>
       </div>

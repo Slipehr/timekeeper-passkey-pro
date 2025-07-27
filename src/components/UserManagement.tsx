@@ -12,6 +12,7 @@ import { UserPlus, Upload, Edit, Trash2, Download, Search, X } from 'lucide-reac
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/hooks/useAuth';
+import { getBaseUrl } from "../utils/getBaseUrl";
 
 interface User {
   id: string;
@@ -70,7 +71,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('/auth/users');
+      const response = await apiRequest(`${getBaseUrl()}/auth/users`);
       setUsers(response);
       setFilteredUsers(response);
     } catch (error: any) {
@@ -131,6 +132,20 @@ export function UserManagement() {
   };
 
   const createUser = async () => {
+    // Check for duplicate email (case-insensitive)
+    const emailExists = users.some(user => 
+      user.email.toLowerCase() === formData.email.toLowerCase()
+    );
+    
+    if (emailExists) {
+      toast({
+        title: "Error",
+        description: "A user with this email already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       // Normalize email to lowercase before sending to backend
       const normalizedFormData = {
@@ -138,19 +153,14 @@ export function UserManagement() {
         email: formData.email.toLowerCase(),
       };
 
-      const response = await apiRequest('/auth/create-user', {
+      await apiRequest(`${getBaseUrl()}/auth/create-user`, {
         method: 'POST',
         body: JSON.stringify(normalizedFormData),
       });
 
-      const successMessage = response.generated_password 
-        ? `User created successfully. Generated password: ${response.generated_password}`
-        : "User created successfully";
-
       toast({
         title: "Success",
-        description: successMessage,
-        duration: response.generated_password ? 10000 : 5000, // Show longer for generated passwords
+        description: "User created successfully",
       });
 
       setIsCreateDialogOpen(false);
@@ -230,7 +240,7 @@ export function UserManagement() {
       const formData = new FormData();
       formData.append('file', blob, 'users.csv');
 
-      const response = await fetch('/auth/users/bulk-upload', {
+      const response = await fetch(`${getBaseUrl()}/auth/users/bulk-upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -676,4 +686,3 @@ export function UserManagement() {
     </Card>
   );
 }
-

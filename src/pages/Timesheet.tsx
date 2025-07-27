@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getBaseUrl } from "../utils/getBaseUrl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,11 +40,11 @@ export default function Timesheet() {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-  const { apiRequest, handleApiError } = useApi();
+  const { getAuthHeaders, handleApiError } = useApi();
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch('/timesheets/', {
+      const response = await fetch(`${getBaseUrl()}/timesheets/`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -95,7 +96,7 @@ export default function Timesheet() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('/projects', {
+      const response = await fetch(`${getBaseUrl()}/projects`, {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -167,7 +168,7 @@ export default function Timesheet() {
 
       if (editingEntry) {
         // Update existing entry
-        const response = await fetch(`/timesheets/${editingEntry.id}`, {
+        const response = await fetch(`http://192.168.11.3:8200/timesheets/${editingEntry.id}`, {
           method: 'PUT',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -184,7 +185,7 @@ export default function Timesheet() {
         }
       } else {
         // Create new entry
-        const response = await fetch('/timesheets', {
+        const response = await fetch(`${getBaseUrl()}/timesheets`, {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),
@@ -237,7 +238,7 @@ export default function Timesheet() {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`/timesheets/${id}`, {
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -280,7 +281,7 @@ export default function Timesheet() {
 
       console.log('Submitting with payload:', payload);
 
-      const response = await fetch(`/timesheets/${id}`, {
+      const response = await fetch(`http://192.168.11.3:8200/timesheets/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(payload),
@@ -558,4 +559,3 @@ export default function Timesheet() {
     </div>
   );
 }
-

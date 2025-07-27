@@ -6,6 +6,7 @@ import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/hooks/useAuth';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { getBaseUrl } from "../utils/getBaseUrl";
 
 interface DashboardStats {
   totalUsers: number;
@@ -22,11 +23,6 @@ interface DashboardStats {
 }
 
 export function AdminDashboard() {
-  const { user } = useAuth();
-  if (user?.role !== UserRole.ADMINISTRATOR) {
-    return <Navigate to="/" replace />;
-  }
-
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -54,7 +50,7 @@ export function AdminDashboard() {
   const fetchAdminStats = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('/auth/users');
+      const response = await apiRequest(`${getBaseUrl()}/auth/users`);
       
       // Calculate stats from users data
       const users = response;
@@ -359,4 +355,3 @@ export function AdminDashboard() {
     </div>
   );
 }
-
