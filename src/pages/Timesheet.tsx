@@ -39,7 +39,7 @@ export default function Timesheet() {
   });
   const { toast } = useToast();
   const { user } = useAuth();
-  const { getAuthHeaders, handleApiError } = useApi();
+  const { apiRequest, handleApiError } = useApi();
 
   const fetchEntries = async () => {
     try {
@@ -558,3 +558,4 @@ export default function Timesheet() {
     </div>
   );
 }
+

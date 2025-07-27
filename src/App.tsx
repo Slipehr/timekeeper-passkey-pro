@@ -16,6 +16,7 @@ import { AdminDashboard } from "@/components/AdminDashboard";
 import { UserManagement } from "@/components/UserManagement";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import DebugApi from "./pages/DebugApi";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const App = () => (
                 </RoleBasedRoute>
               </ProtectedRoute>
             } />
+            <Route path="/debug-api" element={<DebugApi />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -73,3 +75,4 @@ const App = () => (
 );
 
 export default App;
+

@@ -61,6 +61,28 @@ const statusOptions = [
   'Approved',
 ];
 
+
+interface RawEntry {
+  id: string;
+  date: string;
+  hours: number;
+  project?: string | { name: string };
+  project_id?: string;
+  user_id?: string;
+  status?: string;
+  description?: string;
+}
+
+interface TimeEntry {
+  id: string;
+  date: string;
+  hours: number;
+  project: string;
+  description?: string;
+  submitted: boolean;
+  approved: boolean;
+  user: string;
+}
 export default function Reports() {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [filteredEntries, setFilteredEntries] = useState<TimeEntry[]>([]);
@@ -74,21 +96,18 @@ export default function Reports() {
     status: 'All Statuses',
   });
   const { toast } = useToast();
+  const { apiRequest, handleApiError } = useApi();
   const { user } = useAuth();
-  const { getAuthHeaders, handleApiError } = useApi();
   const { canViewAllReports, isRole } = usePermissions();
 
   const fetchReportsData = async () => {
     try {
       const [entriesResponse, projectsResponse, usersResponse] = await Promise.all([
-        fetch('/timesheets/entries', {
-          headers: getAuthHeaders(),
+        fetch('http://192.168.11.3:8200/timesheets/entries', {
         }),
-        fetch('/projects', {
-          headers: getAuthHeaders(),
+        fetch('http://192.168.11.3:8200/projects', {
         }),
-        fetch('/users', {
-          headers: getAuthHeaders(),
+        fetch('http://192.168.11.3:8200/users', {
         }),
       ]);
 

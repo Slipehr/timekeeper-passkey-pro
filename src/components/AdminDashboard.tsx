@@ -22,6 +22,11 @@ interface DashboardStats {
 }
 
 export function AdminDashboard() {
+  const { user } = useAuth();
+  if (user?.role !== UserRole.ADMINISTRATOR) {
+    return <Navigate to="/" replace />;
+  }
+
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeUsers: 0,
@@ -354,3 +359,4 @@ export function AdminDashboard() {
     </div>
   );
 }
+

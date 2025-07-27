@@ -676,3 +676,4 @@ export function UserManagement() {
     </Card>
   );
 }
+

@@ -28,7 +28,7 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { canManageProjects } = usePermissions();
-  const { getAuthHeaders, handleApiError } = useApi();
+  const { apiRequest, handleApiError } = useApi();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -40,8 +40,8 @@ export default function Projects() {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/projects', {
-        headers: getAuthHeaders(),
+      const response = await apiRequest("/projects", {
+        
       });
 
       if (response.ok) {
@@ -132,9 +132,9 @@ export default function Projects() {
 
   const deleteProject = async (projectId: string) => {
     try {
-      const response = await fetch(`/projects/${projectId}`, {
+      const response = await apiRequest(`/projects/${projectId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        
       });
 
       if (response.ok) {
@@ -386,3 +386,4 @@ export default function Projects() {
     </div>
   );
 }
+
