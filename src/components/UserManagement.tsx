@@ -131,20 +131,6 @@ export function UserManagement() {
   };
 
   const createUser = async () => {
-    // Check for duplicate email (case-insensitive)
-    const emailExists = users.some(user => 
-      user.email.toLowerCase() === formData.email.toLowerCase()
-    );
-    
-    if (emailExists) {
-      toast({
-        title: "Error",
-        description: "A user with this email already exists",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       // Normalize email to lowercase before sending to backend
       const normalizedFormData = {
@@ -152,14 +138,19 @@ export function UserManagement() {
         email: formData.email.toLowerCase(),
       };
 
-      await apiRequest('http://192.168.11.3:8200/auth/create-user', {
+      const response = await apiRequest('http://192.168.11.3:8200/auth/create-user', {
         method: 'POST',
         body: JSON.stringify(normalizedFormData),
       });
 
+      const successMessage = response.generated_password 
+        ? `User created successfully. Generated password: ${response.generated_password}`
+        : "User created successfully";
+
       toast({
         title: "Success",
-        description: "User created successfully",
+        description: successMessage,
+        duration: response.generated_password ? 10000 : 5000, // Show longer for generated passwords
       });
 
       setIsCreateDialogOpen(false);
