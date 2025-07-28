@@ -1,5 +1,6 @@
 import { useAuth } from './useAuth';
 import { useToast } from './use-toast';
+import { getApiUrl } from '../lib/config';
 
 export function useApi() {
   const { logout } = useAuth();
@@ -40,8 +41,11 @@ export function useApi() {
     });
   };
 
-  const apiRequest = async (url: string, options: RequestInit = {}) => {
+  const apiRequest = async (urlOrEndpoint: string, options: RequestInit = {}) => {
     try {
+      // If URL is already complete, use it; otherwise, treat as endpoint and build full URL
+      const url = urlOrEndpoint.startsWith('http') ? urlOrEndpoint : getApiUrl(urlOrEndpoint);
+      
       const response = await fetch(url, {
         ...options,
         headers: {

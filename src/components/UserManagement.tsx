@@ -12,6 +12,7 @@ import { UserPlus, Upload, Edit, Trash2, Download, Search, X } from 'lucide-reac
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/hooks/useAuth';
+import { getApiUrl } from '@/lib/config';
 
 interface User {
   id: string;
@@ -70,7 +71,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('http://192.168.11.3:8200/auth/users');
+      const response = await apiRequest('/auth/users');
       setUsers(response);
       setFilteredUsers(response);
     } catch (error: any) {
@@ -138,7 +139,7 @@ export function UserManagement() {
         email: formData.email.toLowerCase(),
       };
 
-      const response = await apiRequest('http://192.168.11.3:8200/auth/create-user', {
+      const response = await apiRequest('/auth/create-user', {
         method: 'POST',
         body: JSON.stringify(normalizedFormData),
       });
@@ -186,7 +187,7 @@ export function UserManagement() {
         email: formData.email.toLowerCase(),
       };
 
-      await apiRequest(`http://192.168.11.3:8200/auth/${editingUser.id}`, {
+      await apiRequest(`/auth/${editingUser.id}`, {
         method: 'PUT',
         body: JSON.stringify(normalizedFormData),
       });
@@ -209,7 +210,7 @@ export function UserManagement() {
     if (!confirm('Are you sure you want to delete this user?')) return;
 
     try {
-      await apiRequest(`http://192.168.11.3:8200/auth/${userId}`, {
+      await apiRequest(`/auth/${userId}`, {
         method: 'DELETE',
       });
 
@@ -230,7 +231,7 @@ export function UserManagement() {
       const formData = new FormData();
       formData.append('file', blob, 'users.csv');
 
-      const response = await fetch('http://192.168.11.3:8200/auth/users/bulk-upload', {
+      const response = await fetch(getApiUrl('/auth/users/bulk-upload'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

@@ -11,6 +11,7 @@ import { Plus, Pencil, Trash2, Building, Calendar, Users } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
+import { getApiUrl } from '@/lib/config';
 
 interface Project {
   id: string;
@@ -40,7 +41,7 @@ export default function Projects() {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://192.168.11.3:8200/projects', {
+      const response = await fetch(getApiUrl('/projects'), {
         headers: getAuthHeaders(),
       });
 
@@ -73,7 +74,7 @@ export default function Projects() {
 
   const createProject = async () => {
     try {
-      const response = await fetch('http://192.168.11.3:8200/projects', {
+      const response = await fetch(getApiUrl('/projects'), {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),
@@ -103,7 +104,7 @@ export default function Projects() {
     if (!selectedProject) return;
 
     try {
-      const response = await fetch(`http://192.168.11.3:8200/projects/${selectedProject.id}`, {
+      const response = await fetch(getApiUrl(`/projects/${selectedProject.id}`), {
         method: 'PUT',
         headers: {
           ...getAuthHeaders(),
@@ -132,7 +133,7 @@ export default function Projects() {
 
   const deleteProject = async (projectId: string) => {
     try {
-      const response = await fetch(`http://192.168.11.3:8200/projects/${projectId}`, {
+      const response = await fetch(getApiUrl(`/projects/${projectId}`), {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

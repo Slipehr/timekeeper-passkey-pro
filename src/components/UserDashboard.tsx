@@ -46,8 +46,8 @@ export function UserDashboard() {
 
       // Fetch user's timesheet entries and projects
       const [timeEntries, projects] = await Promise.all([
-        apiRequest('http://192.168.11.3:8200/timesheets/entries'),
-        apiRequest('http://192.168.11.3:8200/projects')
+        apiRequest('/timesheets/entries'),
+        apiRequest('/projects')
       ]);
       
       // Filter entries for current user

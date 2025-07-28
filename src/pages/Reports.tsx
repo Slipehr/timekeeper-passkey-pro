@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useApi } from '@/hooks/useApi';
 import { usePermissions } from '@/hooks/usePermissions';
+import { getApiUrl } from '@/lib/config';
 import {
   BarChart,
   Bar,
@@ -81,13 +82,13 @@ export default function Reports() {
   const fetchReportsData = async () => {
     try {
       const [entriesResponse, projectsResponse, usersResponse] = await Promise.all([
-        fetch('http://192.168.11.3:8200/timesheets/entries', {
+        fetch(getApiUrl('/timesheets/entries'), {
           headers: getAuthHeaders(),
         }),
-        fetch('http://192.168.11.3:8200/projects', {
+        fetch(getApiUrl('/projects'), {
           headers: getAuthHeaders(),
         }),
-        fetch('http://192.168.11.3:8200/users', {
+        fetch(getApiUrl('/users'), {
           headers: getAuthHeaders(),
         }),
       ]);

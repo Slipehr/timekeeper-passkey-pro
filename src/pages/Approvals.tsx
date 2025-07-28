@@ -39,9 +39,9 @@ export default function Approvals() {
       
       // Fetch timesheet entries, projects, and users
       const [timeEntries, projects, users] = await Promise.all([
-        apiRequest('http://192.168.11.3:8200/timesheets/entries'),
-        apiRequest('http://192.168.11.3:8200/projects'),
-        apiRequest('http://192.168.11.3:8200/auth/users')
+        apiRequest('/timesheets/entries'),
+        apiRequest('/projects'),
+        apiRequest('/auth/users')
       ]);
       
       const pending = timeEntries.filter((entry: any) => entry.status === 'submitted')
@@ -81,7 +81,7 @@ export default function Approvals() {
 
   const approveEntry = async (entryId: string) => {
     try {
-      await apiRequest(`http://192.168.11.3:8200/timesheets/${entryId}/approve`, {
+      await apiRequest(`/timesheets/${entryId}/approve`, {
         method: 'PUT',
       });
 

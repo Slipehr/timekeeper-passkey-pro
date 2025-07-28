@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
+import { getApiUrl, isProductionEnvironment } from '../lib/config';
 
 export enum UserRole {
   USER = "user",
@@ -59,21 +60,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkEnvironment = async () => {
       try {
-        const response = await fetch('http://192.168.11.3:8200/auth/environment');
+        const response = await fetch(getApiUrl('/auth/environment'));
         if (response.ok) {
           const data = await response.json();
           setIsProduction(data.environment === 'production');
+        } else {
+          // Use client-side environment detection as fallback
+          setIsProduction(isProductionEnvironment());
         }
       } catch (error) {
         console.error('Failed to check environment:', error);
-        // Default to production behavior if environment check fails
-        setIsProduction(true);
+        // Use client-side environment detection as fallback
+        setIsProduction(isProductionEnvironment());
       }
     };
 
     const checkBootstrapStatus = async () => {
       try {
-        const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-status');
+        const response = await fetch(getApiUrl('/auth/bootstrap-status'));
         if (response.ok) {
           const data = await response.json();
           setIsBootstrapped(data.bootstrapped);
@@ -101,8 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Use appropriate endpoint based on environment
       const endpoint = isProduction 
-        ? 'http://192.168.11.3:8200/auth/login-password'
-        : 'http://192.168.11.3:8200/auth/dev-login';
+        ? getApiUrl('/auth/login-password')
+        : getApiUrl('/auth/dev-login');
       
       const body = isProduction 
         ? { email: credentials.email.toLowerCase(), password: credentials.password }
@@ -123,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       // Get user details using the token
-      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+      const userResponse = await fetch(getApiUrl('/auth/me'), {
         headers: {
           'Authorization': `Bearer ${data.access_token}`,
         },
@@ -162,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Start WebAuthn authentication flow
-      const response = await fetch('http://192.168.11.3:8200/auth/passkey-login', {
+      const response = await fetch(getApiUrl('/auth/passkey-login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       // Get user details using the token
-      const userResponse = await fetch('http://192.168.11.3:8200/auth/me', {
+      const userResponse = await fetch(getApiUrl('/auth/me'), {
         headers: {
           'Authorization': `Bearer ${data.access_token}`,
         },
@@ -210,7 +214,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       
-      const response = await fetch('http://192.168.11.3:8200/auth/bootstrap-admin', {
+      const response = await fetch(getApiUrl('/auth/bootstrap-admin'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
