@@ -63,13 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await fetch(getApiUrl('/auth/environment'));
         if (response.ok) {
           const data = await response.json();
+          console.log('Backend environment response:', data);
           setIsProduction(data.environment === 'production');
         } else {
+          console.log('Backend environment check failed, using client-side detection');
           // Use client-side environment detection as fallback
           setIsProduction(isProductionEnvironment());
         }
       } catch (error) {
         console.error('Failed to check environment:', error);
+        console.log('Using client-side environment detection as fallback');
         // Use client-side environment detection as fallback
         setIsProduction(isProductionEnvironment());
       }
