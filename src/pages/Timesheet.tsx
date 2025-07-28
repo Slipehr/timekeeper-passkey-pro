@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { getBaseUrl } from "../utils/getBaseUrl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,7 @@ export default function Timesheet() {
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch(`${getBaseUrl()}/timesheets/`, {
+      const response = await fetch('http://192.168.11.3:8200/timesheets/', {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -96,7 +95,7 @@ export default function Timesheet() {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${getBaseUrl()}/projects`, {
+      const response = await fetch('http://192.168.11.3:8200/projects', {
         headers: getAuthHeaders(),
       });
       if (response.ok) {
@@ -185,7 +184,7 @@ export default function Timesheet() {
         }
       } else {
         // Create new entry
-        const response = await fetch(`${getBaseUrl()}/timesheets`, {
+        const response = await fetch('http://192.168.11.3:8200/timesheets', {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(entryData),

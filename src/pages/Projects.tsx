@@ -11,7 +11,6 @@ import { Plus, Pencil, Trash2, Building, Calendar, Users } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useApi } from '@/hooks/useApi';
 import { useToast } from '@/hooks/use-toast';
-import { getBaseUrl } from "../utils/getBaseUrl";
 
 interface Project {
   id: string;
@@ -41,7 +40,7 @@ export default function Projects() {
   const fetchProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${getBaseUrl()}/projects`, {
+      const response = await fetch('http://192.168.11.3:8200/projects', {
         headers: getAuthHeaders(),
       });
 
@@ -74,7 +73,7 @@ export default function Projects() {
 
   const createProject = async () => {
     try {
-      const response = await fetch(`${getBaseUrl()}/projects`, {
+      const response = await fetch('http://192.168.11.3:8200/projects', {
         method: 'POST',
         headers: {
           ...getAuthHeaders(),

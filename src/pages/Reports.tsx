@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { getBaseUrl } from "../utils/getBaseUrl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,13 +81,13 @@ export default function Reports() {
   const fetchReportsData = async () => {
     try {
       const [entriesResponse, projectsResponse, usersResponse] = await Promise.all([
-        fetch(`${getBaseUrl()}/timesheets/entries`, {
+        fetch('http://192.168.11.3:8200/timesheets/entries', {
           headers: getAuthHeaders(),
         }),
-        fetch(`${getBaseUrl()}/projects`, {
+        fetch('http://192.168.11.3:8200/projects', {
           headers: getAuthHeaders(),
         }),
-        fetch(`${getBaseUrl()}/users`, {
+        fetch('http://192.168.11.3:8200/users', {
           headers: getAuthHeaders(),
         }),
       ]);
