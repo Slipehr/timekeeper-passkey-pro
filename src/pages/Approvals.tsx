@@ -39,9 +39,9 @@ export default function Approvals() {
       
       // Fetch timesheet entries, projects, and users
       const [timeEntries, projects, users] = await Promise.all([
-        apiRequest('/timesheets/entries'),
-        apiRequest('/projects'),
-        apiRequest('/auth/users')
+        apiRequest('/timesheets/entries/'),
+        apiRequest('/projects/'),
+        apiRequest('/auth/users/')
       ]);
       
       const pending = timeEntries.filter((entry: any) => entry.status === 'submitted')

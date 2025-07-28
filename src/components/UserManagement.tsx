@@ -71,7 +71,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('/auth/users');
+      const response = await apiRequest('/auth/users/');
       setUsers(response);
       setFilteredUsers(response);
     } catch (error: any) {
