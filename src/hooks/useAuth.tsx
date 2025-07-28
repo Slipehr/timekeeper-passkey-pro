@@ -73,9 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Handle environment check
         if (envResponse.status === 'fulfilled' && envResponse.value.ok) {
           const envData = await envResponse.value.json();
-          setIsProduction(envData.environment === 'production');
+          console.log('Environment response:', envData);
+          const prodValue = envData.environment === 'production';
+          console.log('Setting isProduction to:', prodValue);
+          setIsProduction(prodValue);
         } else {
           console.error('Failed to check environment:', envResponse.status === 'rejected' ? envResponse.reason : 'Request failed');
+          console.log('Setting isProduction to: true (default)');
           setIsProduction(true); // Default to production
           setConnectionError(true);
         }
