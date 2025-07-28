@@ -122,6 +122,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ? `${getBaseUrl()}/auth/login-password`
         : `${getBaseUrl()}/auth/dev-login`;
       
+      console.log('Login attempt:', { isProduction, endpoint });
+      
       const body = isProduction 
         ? { email: credentials.email.toLowerCase(), password: credentials.password }
         : { email: credentials.email.toLowerCase() };
