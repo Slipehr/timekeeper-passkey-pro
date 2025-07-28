@@ -34,8 +34,32 @@ def create_project(
     db.refresh(project)
     return project
 
-@router.get("", response_model=List[ProjectOut])
+@router.post("", response_model=ProjectOut, include_in_schema=False)
+def create_project_no_slash(
+    project_data: ProjectCreate,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role(UserRole.manager))
+):
+    project = Project(
+        name=project_data.name,
+        description=project_data.description,
+        status=project_data.status or ProjectStatus.active,
+    )
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    return project
+
+
+@router.get("/", response_model=List[ProjectOut])
 def get_all_projects(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_role(UserRole.user, UserRole.manager, UserRole.audit))
+):
+    return db.query(Project).all()
+
+@router.get("", response_model=List[ProjectOut], include_in_schema=False)
+def get_all_projects_no_slash(
     db: Session = Depends(get_db),
     _: User = Depends(require_role(UserRole.user, UserRole.manager, UserRole.audit))
 ):
