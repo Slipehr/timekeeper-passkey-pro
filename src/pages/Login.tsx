@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const { user, login, loginWithPasskey, bootstrapAdmin, isLoading, isProduction, isBootstrapped } = useAuth();
+  const { user, login, loginWithPasskey, bootstrapAdmin, isLoading, isProduction, isBootstrapped, connectionError } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [credentials, setCredentials] = useState({ email: '', password: '' });
@@ -248,7 +248,17 @@ export default function Login() {
         </Card>
 
         <div className="text-center mt-6 space-y-2">
-          {isProduction === false && (
+          {connectionError && (
+            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
+              <p className="text-red-100 text-sm font-medium">
+                Connection Issue
+              </p>
+              <p className="text-red-100/80 text-xs mt-1">
+                Unable to connect to server. Please check your connection.
+              </p>
+            </div>
+          )}
+          {isProduction === false && !connectionError && (
             <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
               <p className="text-yellow-100 text-sm font-medium">
                 Development Mode
@@ -259,7 +269,7 @@ export default function Login() {
             </div>
           )}
           <p className="text-white/60 text-sm">
-            Demo credentials: any email + any password
+            © {new Date().getFullYear()} dahlberg.ninja. All rights reserved.
           </p>
         </div>
       </div>

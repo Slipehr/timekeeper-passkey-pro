@@ -26,6 +26,7 @@ interface AuthContextType {
   isLoading: boolean;
   isProduction: boolean | null;
   isBootstrapped: boolean | null;
+  connectionError: boolean;
 }
 
 interface LoginCredentials {
@@ -56,49 +57,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isProduction, setIsProduction] = useState<boolean | null>(null);
   const [isBootstrapped, setIsBootstrapped] = useState<boolean | null>(null);
+  const [connectionError, setConnectionError] = useState(false);
 
   useEffect(() => {
-    const checkEnvironment = async () => {
+    const initializeAuth = async () => {
+      setConnectionError(false);
+      
       try {
-        const response = await fetch(`${getBaseUrl()}/auth/environment`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsProduction(data.environment === 'production');
+        // Check environment and bootstrap status in parallel
+        const [envResponse, bootstrapResponse] = await Promise.allSettled([
+          fetch(`${getBaseUrl()}/auth/environment`),
+          fetch(`${getBaseUrl()}/auth/bootstrap-status`)
+        ]);
+
+        // Handle environment check
+        if (envResponse.status === 'fulfilled' && envResponse.value.ok) {
+          const envData = await envResponse.value.json();
+          setIsProduction(envData.environment === 'production');
+        } else {
+          console.error('Failed to check environment:', envResponse.status === 'rejected' ? envResponse.reason : 'Request failed');
+          setIsProduction(true); // Default to production
+          setConnectionError(true);
+        }
+
+        // Handle bootstrap status check
+        if (bootstrapResponse.status === 'fulfilled' && bootstrapResponse.value.ok) {
+          const bootstrapData = await bootstrapResponse.value.json();
+          setIsBootstrapped(bootstrapData.bootstrapped);
+        } else {
+          console.error('Failed to check bootstrap status:', bootstrapResponse.status === 'rejected' ? bootstrapResponse.reason : 'Request failed');
+          setIsBootstrapped(true); // Default to bootstrapped
+          setConnectionError(true);
         }
       } catch (error) {
-        console.error('Failed to check environment:', error);
-        // Default to production behavior if environment check fails
+        console.error('Failed to initialize auth:', error);
         setIsProduction(true);
-      }
-    };
-
-    const checkBootstrapStatus = async () => {
-      try {
-        const response = await fetch(`${getBaseUrl()}/auth/bootstrap-status`);
-        if (response.ok) {
-          const data = await response.json();
-          setIsBootstrapped(data.bootstrapped);
-        }
-      } catch (error) {
-        console.error('Failed to check bootstrap status:', error);
-        // Default to bootstrapped if check fails
         setIsBootstrapped(true);
+        setConnectionError(true);
+      } finally {
+        // Load stored user if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+        setIsLoading(false);
       }
     };
 
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    
-    checkEnvironment();
-    checkBootstrapStatus();
-    setIsLoading(false);
+    initializeAuth();
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
+    // Ensure environment is determined before login
+    if (isProduction === null) {
+      throw new Error('Environment not yet determined. Please wait and try again.');
+    }
+
     try {
       setIsLoading(true);
+      setConnectionError(false);
       
       // Use appropriate endpoint based on environment
       const endpoint = isProduction 
@@ -148,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Authentication failed:', error);
+      setConnectionError(true);
       throw error;
     } finally {
       setIsLoading(false);
@@ -255,6 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isProduction,
       isBootstrapped,
+      connectionError,
     }}>
       {children}
     </AuthContext.Provider>
