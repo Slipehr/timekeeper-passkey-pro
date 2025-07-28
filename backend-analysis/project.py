@@ -34,7 +34,7 @@ def create_project(
     db.refresh(project)
     return project
 
-@router.get("/", response_model=List[ProjectOut])
+@router.get("", response_model=List[ProjectOut])
 def get_all_projects(
     db: Session = Depends(get_db),
     _: User = Depends(require_role(UserRole.user, UserRole.manager, UserRole.audit))
