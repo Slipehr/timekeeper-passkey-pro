@@ -106,14 +106,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       
+      // Re-check environment at login time to ensure we have the latest state
+      let currentIsProduction = isProduction;
+      if (currentIsProduction === null) {
+        try {
+          const envResponse = await fetch(getApiUrl('/auth/environment'));
+          if (envResponse.ok) {
+            const envData = await envResponse.json();
+            currentIsProduction = envData.environment === 'production';
+            setIsProduction(currentIsProduction);
+          } else {
+            currentIsProduction = isProductionEnvironment();
+            setIsProduction(currentIsProduction);
+          }
+        } catch (error) {
+          console.error('Environment check failed at login:', error);
+          currentIsProduction = isProductionEnvironment();
+          setIsProduction(currentIsProduction);
+        }
+      }
+      
       // Use appropriate endpoint based on environment
-      console.log('Login attempt - isProduction:', isProduction);
-      const endpoint = isProduction 
+      console.log('Login attempt - currentIsProduction:', currentIsProduction);
+      const endpoint = currentIsProduction 
         ? getApiUrl('/auth/login-password')
         : getApiUrl('/auth/dev-login');
       
       console.log('Using endpoint:', endpoint);
-      const body = isProduction 
+      const body = currentIsProduction 
         ? { email: credentials.email.toLowerCase(), password: credentials.password }
         : { email: credentials.email.toLowerCase() };
 
