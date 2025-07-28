@@ -49,7 +49,7 @@ export function AdminDashboard() {
   const fetchAdminStats = async () => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('/auth/users/');
+      const response = await apiRequest('/auth/users');
       
       // Calculate stats from users data
       const users = response;
