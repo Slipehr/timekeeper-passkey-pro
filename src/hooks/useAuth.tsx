@@ -64,8 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.ok) {
           const data = await response.json();
           console.log('Backend environment response:', data);
-          console.log('Setting isProduction to:', data.isProduction);
-          setIsProduction(data.isProduction);
+          const isProduction = data.environment === 'production';
+          console.log('Setting isProduction to:', isProduction);
+          setIsProduction(isProduction);
         } else {
           console.log('Backend environment check failed, using client-side detection');
           // Use client-side environment detection as fallback
@@ -115,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (envResponse.ok) {
             const envData = await envResponse.json();
             console.log('Login environment re-check:', envData);
-            currentIsProduction = envData.isProduction;
+            currentIsProduction = envData.environment === 'production';
             setIsProduction(currentIsProduction);
           } else {
             currentIsProduction = isProductionEnvironment();
