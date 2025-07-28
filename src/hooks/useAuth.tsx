@@ -107,10 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       
       // Use appropriate endpoint based on environment
+      console.log('Login attempt - isProduction:', isProduction);
       const endpoint = isProduction 
         ? getApiUrl('/auth/login-password')
         : getApiUrl('/auth/dev-login');
       
+      console.log('Using endpoint:', endpoint);
       const body = isProduction 
         ? { email: credentials.email.toLowerCase(), password: credentials.password }
         : { email: credentials.email.toLowerCase() };
