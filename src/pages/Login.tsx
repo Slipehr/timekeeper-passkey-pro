@@ -258,13 +258,26 @@ export default function Login() {
               </p>
             </div>
           )}
-          {isProduction === false && !connectionError && (
-            <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mb-4">
-              <p className="text-yellow-100 text-sm font-medium">
-                Development Mode
+          
+          {/* Environment Indicator */}
+          {isProduction !== null && !connectionError && (
+            <div className={`border rounded-lg p-3 mb-4 ${
+              isProduction 
+                ? 'bg-green-500/20 border-green-500/30' 
+                : 'bg-yellow-500/20 border-yellow-500/30'
+            }`}>
+              <p className={`text-sm font-medium ${
+                isProduction ? 'text-green-100' : 'text-yellow-100'
+              }`}>
+                {isProduction ? 'Production Mode' : 'Development Mode'}
               </p>
-              <p className="text-yellow-100/80 text-xs mt-1">
-                Any email can be used for login
+              <p className={`text-xs mt-1 ${
+                isProduction ? 'text-green-100/80' : 'text-yellow-100/80'
+              }`}>
+                {isProduction 
+                  ? 'Secure authentication required' 
+                  : 'Any email can be used for login'
+                }
               </p>
             </div>
           )}
